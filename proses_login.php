@@ -15,7 +15,7 @@ if (mysqli_num_rows($hasil) == 1) {
     if (password_verify($password,$data['password'])) {
         //password cocok,buat session
         $_SESSION['login']=true;
-        $_SESSION['id_user']=$data['id'];
+        $_SESSION['id']=$data['id'];
         $_SESSION['name']=$data['name'];
         $_SESSION['role']=$data['role'];
 
