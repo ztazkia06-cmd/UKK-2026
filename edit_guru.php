@@ -5,7 +5,7 @@ include 'config/koneksi.php';
 
 $id = $_GET['id'];
 
-$sql = "SELECT * FROM tbl_guru WHERE id = '$id'";
+$sql = "SELECT * FROM t_guru WHERE id = '$id'";
 $hasil = mysqli_query($koneksi, $sql);
 $data = mysqli_fetch_assoc($hasil);
 ?>
