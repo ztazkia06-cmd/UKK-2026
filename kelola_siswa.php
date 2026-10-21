@@ -199,11 +199,10 @@ if (!$hasil) {
                                     </td>
 
                                     <td>
-                                        <a
-                                            href="edit_siswa.php?nis=<?= urlencode($nis); ?>"
-                                            class="btn btn-warning btn-sm btn-aksi">
-                                            Edit
-                                        </a>
+                                      <a href="edit_siswa.php?nis=<?= urlencode($nis); ?>"
+                                       class="btn btn-warning btn-sm btn-aksi">
+                                       Edit
+                                    </a>
 
                                         <a
                                             href="hapus_siswa.php?nis=<?= urlencode($nis); ?>"

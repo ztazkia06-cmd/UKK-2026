@@ -10,13 +10,13 @@ $id = $_GET['id'];
 // Ambil nama guru sebelum dihapus
 $cek = mysqli_query(
     $koneksi,
-    "SELECT nama FROM tbl_guru WHERE id = '$id'"
+    "SELECT nama FROM t_guru WHERE id = '$id'"
 );
 
 $data = mysqli_fetch_assoc($cek);
 
 // Hapus data guru
-$sql = "DELETE FROM tbl_guru WHERE id = '$id'";
+$sql = "DELETE FROM t_guru WHERE id = '$id'";
 
 if (mysqli_query($koneksi, $sql)) {
 
@@ -25,16 +25,9 @@ if (mysqli_query($koneksi, $sql)) {
 
     $aktivitas = "hapus guru: " . $data['nama'];
 
-    // Simpan aktivitas ke tabel log
-    $log = "INSERT INTO tbl_log 
-            (id_user, aktivitas, waktu) 
-            VALUES 
-            ('$id_user', '$aktivitas', '$waktu')";
-
-    mysqli_query($koneksi, $log);
 }
 
 // Kembali ke halaman kelola guru
 header('Location: kelola_guru.php');
 exit;
-?> 
+?>

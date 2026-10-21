@@ -1,3 +1,4 @@
+
 <?php
 // edit_guru.php
 include 'includes/cek_session.php';
@@ -11,90 +12,118 @@ $data = mysqli_fetch_assoc($hasil);
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="id">
+
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Guru</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css">
 </head>
 
 <body>
 
-    <h1>Edit Guru</h1>
+<div class="container-fluid">
+    <div class="row">
 
-    <form action="proses_edit_guru.php" method="POST">
+        <?php include 'layout/sidebar.php'; ?>
 
-        <input type="hidden" name="id" value="<?php echo $data['id']; ?>">
+        <main class="col-md-9 col-lg-10 p-4">
 
-        <table>
+            <h3 class="mb-4">Edit Guru</h3>
 
-            <tr>
-                <td>NIP</td>
-                <td>:</td>
-                <td>
-                    <input type="text" name="nip"
-                        value="<?php echo $data['nip']; ?>" required>
-                </td>
-            </tr>
+            <div class="card">
 
-            <tr>
-                <td>Nama Guru</td>
-                <td>:</td>
-                <td>
-                    <input type="text" name="nama"
-                        value="<?php echo $data['nama']; ?>" required>
-                </td>
-            </tr>
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Form Edit Data Guru</h5>
+                </div>
 
-            <tr>
-                <td>Email</td>
-                <td>:</td>
-                <td>
-                    <input type="email" name="email"
-                        value="<?php echo $data['email']; ?>" required>
-                </td>
-            </tr>
+                <div class="card-body">
 
-            <tr>
-                <td>Status Aktif</td>
-                <td>:</td>
-                <td>
-                    <select name="status_aktif" required>
+                    <a href="kelola_guru.php"
+                       class="btn btn-secondary btn-sm mb-3">
+                        Kembali ke Kelola Guru
+                    </a>
 
-                        <option value="1"
-                            <?php if ($data['status_aktif'] == 1) echo 'selected'; ?>>
-                            Aktif
-                        </option>
+                    <form action="proses_edit_guru.php" method="POST">
 
-                        <option value="0"
-                            <?php if ($data['status_aktif'] == 0) echo 'selected'; ?>>
-                            Tidak Aktif
-                        </option>
+                        <input type="hidden" name="id"
+                               value="<?php echo $data['id']; ?>">
 
-                    </select>
-                </td>
-            </tr>
+                        <div class="form-group">
+                            <label>NIP</label>
+                            <input type="text" name="nip"
+                                   class="form-control"
+                                   value="<?php echo $data['nip']; ?>"
+                                   required>
+                        </div>
 
-            <tr>
-                <td>User ID</td>
-                <td>:</td>
-                <td>
-                    <input type="number" name="user_id"
-                        value="<?php echo $data['user_id']; ?>">
-                </td>
-            </tr>
+                        <div class="form-group">
+                            <label>Nama Guru</label>
+                            <input type="text" name="nama"
+                                   class="form-control"
+                                   value="<?php echo $data['nama']; ?>"
+                                   required>
+                        </div>
 
-            <tr>
-                <td colspan="3">
-                    <input type="submit" value="Update">
-                </td>
-            </tr>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" name="email"
+                                   class="form-control"
+                                   value="<?php echo $data['email']; ?>"
+                                   required>
+                        </div>
 
-        </table>
+                        <div class="form-group">
+                            <label>Status Aktif</label>
+                            <select name="status_aktif"
+                                    class="form-control" required>
 
-    </form>
+                                <option value="1"
+                                    <?php if ($data['status_aktif'] == 1) echo 'selected'; ?>>
+                                    Aktif
+                                </option>
 
-    <p>
-        <a href="kelola_guru.php">Kembali ke Kelola Guru</a>
-    </p>
+                                <option value="0"
+                                    <?php if ($data['status_aktif'] == 0) echo 'selected'; ?>>
+                                    Tidak Aktif
+                                </option>
+
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>User ID</label>
+                            <input type="number" name="user_id"
+                                   class="form-control"
+                                   value="<?php echo $data['user_id']; ?>">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            Update
+                        </button>
+
+                        <a href="kelola_guru.php"
+                           class="btn btn-secondary">
+                            Batal
+                        </a>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </main>
+
+    </div>
+</div>
+
+<!-- Bootstrap JavaScript -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
