@@ -1,40 +1,42 @@
-
 <?php
+// proses_tambah_wali_kelas.php
 include 'includes/cek_session.php';
 include 'config/koneksi.php';
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: tambah_wali_kelas.php');
-    exit;
+$tahun_ajaran_id = $_POST['tahun_ajaran_id'];
+$kelas_id = $_POST['kelas_id'];
+$guru_id = $_POST['guru_id'];
+$tanggal_mulai = $_POST['tanggal_mulai'];
+$tanggal_selesai = $_POST['tanggal_selesai'];
+$status_aktif = $_POST['status_aktif'];
+
+if ($tanggal_selesai < $tanggal_mulai) {
+    exit('Tanggal selesai tidak boleh lebih awal dari tanggal mulai.');
 }
 
-$id_guru = filter_input(INPUT_POST, 'id_guru', FILTER_VALIDATE_INT);
-$id_kelas = filter_input(INPUT_POST, 'id_kelas', FILTER_VALIDATE_INT);
-$tahun_ajaran = trim($_POST['tahun_ajaran'] ?? '');
+$sql = "INSERT INTO t_wali_kelas
+        (tahun_ajaran_id, kelas_id, guru_id,
+         tanggal_mulai, tanggal_selesai, status_aktif)
+        VALUES (?, ?, ?, ?, ?, ?)";
 
-if (!$id_guru || !$id_kelas || $tahun_ajaran === '') {
-    die("Semua data wajib diisi dengan benar.");
-}
-
-$stmt = mysqli_prepare(
-    $koneksi,
-    "INSERT INTO t_wali_kelas (id_guru, id_kelas, tahun_ajaran)
-     VALUES (?, ?, ?)"
-);
+$stmt = mysqli_prepare($koneksi, $sql);
 
 mysqli_stmt_bind_param(
-    $stmt, "iis",
-    $id_guru, $id_kelas, $tahun_ajaran
+    $stmt,
+    "iiissi",
+    $tahun_ajaran_id,
+    $kelas_id,
+    $guru_id,
+    $tanggal_mulai,
+    $tanggal_selesai,
+    $status_aktif
 );
 
 if (mysqli_stmt_execute($stmt)) {
-    mysqli_stmt_close($stmt);
-    header('Location: kelola_wali_kelas.php');
+    header("Location: kelola_wali_kelas.php");
     exit;
+} else {
+    echo "Gagal menambahkan wali kelas: "
+        . mysqli_stmt_error($stmt);
 }
-
-$pesan = mysqli_stmt_error($stmt);
-mysqli_stmt_close($stmt);
-
-die("Gagal menyimpan data: " . htmlspecialchars($pesan));
 ?>

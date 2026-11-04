@@ -1,10 +1,10 @@
+
 <?php
 // kelola_jenis_pelanggaran.php
-
 include 'includes/cek_session.php';
 include 'config/koneksi.php';
 
-// Ambil data jenis pelanggaran beserta kategori
+// Ambil data jenis pelanggaran beserta nama kategorinya
 $sql = "SELECT
             p.id,
             p.pelanggaran_kategori_id,
@@ -24,64 +24,26 @@ $sql = "SELECT
 $hasil = mysqli_query($koneksi, $sql);
 
 if (!$hasil) {
-    die("Query gagal: " . htmlspecialchars(
-        mysqli_error($koneksi),
-        ENT_QUOTES,
-        'UTF-8'
-    ));
+    die("Gagal mengambil data: " .
+        htmlspecialchars(mysqli_error($koneksi)));
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Kelola Jenis Pelanggaran</title>
 
-    <!-- Bootstrap 4 -->
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css">
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+          rel="stylesheet">
 
-    <!-- DataTables -->
-    <link rel="stylesheet"
-          href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap4.min.css">
-
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-
-        main {
-            min-height: 100vh;
-        }
-
-        .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-        }
-
-        .judul-halaman {
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-
-        #tabelPelanggaran th,
-        #tabelPelanggaran td {
-            vertical-align: middle;
-        }
-
-        .dataTables_wrapper {
-            padding-top: 10px;
-        }
-
-        .btn-aksi {
-            margin: 2px;
-        }
-    </style>
+    <!-- DataTables Bootstrap 5 -->
+    <link href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css"
+          rel="stylesheet">
 </head>
 
 <body>
@@ -89,195 +51,132 @@ if (!$hasil) {
 <div class="container-fluid">
     <div class="row">
 
-        <!-- SIDEBAR -->
         <?php include 'layout/sidebar.php'; ?>
 
-        <!-- KONTEN UTAMA -->
+        <!-- KONTEN -->
         <main class="col-md-9 col-lg-10 p-4">
 
-            <h3 class="judul-halaman">Kelola Jenis Pelanggaran</h3>
+            <h2>Kelola Jenis Pelanggaran</h2>
+            <p>Selamat datang di halaman Jenis Pelanggaran.</p>
 
-            <!-- Pesan berhasil -->
             <?php if (isset($_SESSION['pesan_sukses'])) { ?>
                 <div class="alert alert-success">
-                    <?= htmlspecialchars(
-                        $_SESSION['pesan_sukses'],
-                        ENT_QUOTES,
-                        'UTF-8'
-                    ); ?>
+                    <?= htmlspecialchars($_SESSION['pesan_sukses']); ?>
                 </div>
                 <?php unset($_SESSION['pesan_sukses']); ?>
             <?php } ?>
 
-            <!-- Pesan gagal -->
             <?php if (isset($_SESSION['pesan_error'])) { ?>
                 <div class="alert alert-danger">
-                    <?= htmlspecialchars(
-                        $_SESSION['pesan_error'],
-                        ENT_QUOTES,
-                        'UTF-8'
-                    ); ?>
+                    <?= htmlspecialchars($_SESSION['pesan_error']); ?>
                 </div>
                 <?php unset($_SESSION['pesan_error']); ?>
             <?php } ?>
 
-            <div class="card">
+            <div class="mb-3">
+                <a href="dashboard.php" class="btn btn-secondary">
+                    Kembali ke Dashboard
+                </a>
 
-                <!-- HEADER CARD -->
-                <div class="card-header bg-white d-flex
-                            justify-content-between align-items-center">
+                <a href="tambah_jenis_pelanggaran.php"
+                   class="btn btn-primary">
+                    Tambah Jenis Pelanggaran
+                </a>
+            </div>
 
-                    <h5 class="mb-0">Data Jenis Pelanggaran</h5>
+            <!-- TABEL JENIS PELANGGARAN -->
+            <div class="table-responsive">
 
-                    <a href="tambah_jenis_pelanggaran.php"
-                       class="btn btn-primary btn-sm">
-                        + Tambah Jenis Pelanggaran
-                    </a>
+                <table id="tabelPelanggaran"
+                       class="table table-striped table-bordered table-hover">
 
-                </div>
+                    <thead class="table-dark">
+                        <tr>
+                            <th>No</th>
+                            <th>ID</th>
+                            <th>Kategori</th>
+                            <th>Kode</th>
+                            <th>Nama Pelanggaran</th>
+                            <th>Poin</th>
+                            <th>Deskripsi</th>
+                            <th>Status</th>
+                            <th>Dibuat</th>
+                            <th>Diubah</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
 
-                <!-- ISI CARD -->
-                <div class="card-body">
+                    <tbody>
 
-                    <div class="mb-3">
-                        <a href="dashboard.php"
-                           class="btn btn-secondary btn-sm">
-                            Kembali ke Dashboard
-                        </a>
-                    </div>
+                    <?php
+                    $no = 1;
 
-                    <div class="table-responsive">
+                    while ($row = mysqli_fetch_assoc($hasil)) {
+                    ?>
 
-                        <table id="tabelPelanggaran"
-                               class="table table-striped table-bordered table-hover"
-                               style="width:100%">
+                        <tr>
+                            <td><?php echo $no++; ?></td>
 
-                            <thead class="thead-dark">
-                                <tr>
-                                    <th>No.</th>
-                                    <th>ID</th>
-                                    <th>Kategori</th>
-                                    <th>Kode</th>
-                                    <th>Nama Pelanggaran</th>
-                                    <th>Poin</th>
-                                    <th>Deskripsi</th>
-                                    <th>Status Aktif</th>
-                                    <th>Dibuat</th>
-                                    <th>Diubah</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
+                            <td>
+                                <?php echo (int) $row['id']; ?>
+                            </td>
 
-                            <tbody>
+                            <td>
+                                <?php echo htmlspecialchars($row['nama_kategori'] ?? '-'); ?>
+                            </td>
 
-                            <?php
-                            $no = 1;
+                            <td>
+                                <?php echo htmlspecialchars($row['kode'] ?? ''); ?>
+                            </td>
 
-                            while ($row = mysqli_fetch_assoc($hasil)) {
-                            ?>
+                            <td>
+                                <?php echo htmlspecialchars($row['nama'] ?? ''); ?>
+                            </td>
 
-                                <tr>
-                                    <td><?= $no++; ?></td>
+                            <td>
+                                <?php echo (int) $row['poin']; ?>
+                            </td>
 
-                                    <td>
-                                        <?= htmlspecialchars(
-                                            (string) $row['id'],
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ); ?>
-                                    </td>
+                            <td>
+                                <?php echo htmlspecialchars($row['deskripsi'] ?? '-'); ?>
+                            </td>
 
-                                    <td>
-                                        <?= htmlspecialchars(
-                                            (string) ($row['nama_kategori'] ?? '-'),
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ); ?>
-                                    </td>
+                            <td>
+                                <?php
+                                echo ($row['status_aktif'] == 1)
+                                    ? 'Aktif'
+                                    : 'Tidak Aktif';
+                                ?>
+                            </td>
 
-                                    <td>
-                                        <?= htmlspecialchars(
-                                            (string) ($row['kode'] ?? ''),
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ); ?>
-                                    </td>
+                            <td>
+                                <?php echo htmlspecialchars($row['created_at'] ?? '-'); ?>
+                            </td>
 
-                                    <td>
-                                        <?= htmlspecialchars(
-                                            (string) ($row['nama'] ?? ''),
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ); ?>
-                                    </td>
+                            <td>
+                                <?php echo htmlspecialchars($row['updated_at'] ?? '-'); ?>
+                            </td>
 
-                                    <td>
-                                        <?= (int) $row['poin']; ?>
-                                    </td>
+                            <td>
+                                <a href="edit_jenis_pelanggaran.php?id=<?php echo urlencode($row['id']); ?>"
+                                   class="btn btn-primary btn-sm">
+                                    Edit
+                                </a>
 
-                                    <td>
-                                        <?= htmlspecialchars(
-                                            (string) ($row['deskripsi'] ?? '-'),
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ); ?>
-                                    </td>
+                                <a href="hapus_jenis_pelanggaran.php?id=<?php echo urlencode($row['id']); ?>"
+                                   class="btn btn-danger btn-sm"
+                                   onclick="return confirm('Yakin ingin menghapus jenis pelanggaran ini?');">
+                                    Hapus
+                                </a>
+                            </td>
+                        </tr>
 
-                                    <td>
-                                        <?php if ((int) $row['status_aktif'] === 1) { ?>
+                    <?php } ?>
 
-                                            <span class="badge badge-success">
-                                                Aktif
-                                            </span>
+                    </tbody>
 
-                                        <?php } else { ?>
+                </table>
 
-                                            <span class="badge badge-danger">
-                                                Tidak Aktif
-                                            </span>
-
-                                        <?php } ?>
-                                    </td>
-
-                                    <td>
-                                        <?= htmlspecialchars(
-                                            (string) ($row['created_at'] ?? '-'),
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ); ?>
-                                    </td>
-
-                                    <td>
-                                        <?= htmlspecialchars(
-                                            (string) ($row['updated_at'] ?? '-'),
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ); ?>
-                                    </td>
-
-                                    <td>
-                                        <a
-                                            href="edit_jenis_pelanggaran.php?id=<?= urlencode((string) $row['id']); ?>"
-                                            class="btn btn-warning btn-sm btn-aksi">
-                                            Edit
-                                        </a>
-
-                                        <a
-                                            href="hapus_jenis_pelanggaran.php?id=<?= urlencode((string) $row['id']); ?>"
-                                            class="btn btn-danger btn-sm btn-aksi"
-                                            onclick="return confirm('Yakin ingin menghapus jenis pelanggaran ini?');">
-                                            Hapus
-                                        </a>
-                                    </td>
-                                </tr>
-
-                            <?php } ?>
-
-                            </tbody>
-                        </table>
-
-                    </div>
-                </div>
             </div>
 
         </main>
@@ -287,15 +186,11 @@ if (!$hasil) {
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-<!-- Bootstrap JavaScript -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- DataTables -->
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
 
-<!-- DataTables JavaScript -->
-<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-
-<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap4.min.js"></script>
-
-<!-- Pengaturan tabel -->
+<!-- Mengaktifkan DataTables -->
 <script>
 $(document).ready(function () {
 
@@ -305,10 +200,9 @@ $(document).ready(function () {
             search: "Cari:",
             lengthMenu: "Tampilkan _MENU_ data",
             info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-            infoEmpty: "Tidak ada data",
-            infoFiltered: "(difilter dari _MAX_ total data)",
-            zeroRecords: "Data tidak ditemukan",
-            emptyTable: "Belum ada jenis pelanggaran",
+            infoEmpty: "Tidak ada data jenis pelanggaran",
+            zeroRecords: "Data jenis pelanggaran tidak ditemukan",
+            emptyTable: "Belum ada data jenis pelanggaran",
 
             paginate: {
                 first: "Pertama",
@@ -322,14 +216,6 @@ $(document).ready(function () {
 
         lengthMenu: [5, 10, 25, 50, 100],
 
-        searching: true,
-
-        ordering: true,
-
-        paging: true,
-
-        autoWidth: false,
-
         columnDefs: [
             {
                 targets: [0, 10],
@@ -338,7 +224,18 @@ $(document).ready(function () {
             }
         ],
 
-        order: [[4, 'asc']]
+        order: [],
+
+        drawCallback: function () {
+            var api = this.api();
+            var info = api.page.info();
+
+            api.column(0, {
+                page: 'current'
+            }).nodes().each(function (cell, i) {
+                cell.innerHTML = info.start + i + 1;
+            });
+        }
 
     });
 

@@ -125,14 +125,14 @@ if ($role === 'guru') {
 
                     <!-- DATA GURU -->
                     <div class="col-md-4 mb-3">
-                        <div class="card shadow-sm border-success h-100">
+                        <div class="card shadow-sm border-primary h-100">
                             <div class="card-body">
                                 <h5>Data Guru</h5>
-                                <h2 class="text-success">
+                                <h2 class="text-primary">
                                     <?= number_format($total_guru); ?>
                                 </h2>
                                 <a href="kelola_guru.php"
-                                   class="btn btn-success btn-sm">
+                                   class="btn btn-primary btn-sm">
                                     Lihat Data Guru
                                 </a>
                             </div>
@@ -141,14 +141,14 @@ if ($role === 'guru') {
 
                     <!-- DATA KELAS -->
                     <div class="col-md-4 mb-3">
-                        <div class="card shadow-sm border-warning h-100">
+                        <div class="card shadow-sm border-primary h-100">
                             <div class="card-body">
                                 <h5>Kelas</h5>
-                                <h2 class="text-warning">
+                                <h2 class="text-primary">
                                     <?= number_format($total_kelas); ?>
                                 </h2>
                                 <a href="kelola_kelas.php"
-                                   class="btn btn-warning btn-sm">
+                                   class="btn btn-primary btn-sm">
                                     Lihat Data Kelas
                                 </a>
                             </div>
@@ -157,14 +157,14 @@ if ($role === 'guru') {
 
                     <!-- TAHUN AJARAN -->
                     <div class="col-md-4 mb-3">
-                        <div class="card shadow-sm border-info h-100">
+                        <div class="card shadow-sm border-primary h-100">
                             <div class="card-body">
                                 <h5>Tahun Ajaran</h5>
-                                <h2 class="text-info">
+                                <h2 class="text-primary">
                                     <?= number_format($total_tahun); ?>
                                 </h2>
                                 <a href="kelola_tahun_ajaran.php"
-                                   class="btn btn-info btn-sm">
+                                   class="btn btn-primary btn-sm">
                                     Lihat Tahun Ajaran
                                 </a>
                             </div>
@@ -173,15 +173,31 @@ if ($role === 'guru') {
 
                     <!-- WALI KELAS -->
                     <div class="col-md-4 mb-3">
-                        <div class="card shadow-sm border-dark h-100">
+                        <div class="card shadow-sm border-primary h-100">
                             <div class="card-body">
                                 <h5>Data Wali Kelas</h5>
-                                <h2 class="text-dark">
+                                <h2 class="text-primary">
                                     <?= number_format($total_wali_kelas); ?>
                                 </h2>
                                 <a href="kelola_wali_kelas.php"
-                                   class="btn btn-dark btn-sm">
+                                   class="btn btn-primary btn-sm">
                                     Lihat Data Wali Kelas
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PENEMPATAN SISWA -->
+                    <div class="col-md-4 mb-3">
+                        <div class="card shadow-sm border-primary h-100">
+                            <div class="card-body">
+                                <h5>Penempatan Siswa</h5>
+                                <h2 class="text-primary">
+                                    <?= number_format($total_kelas); ?>
+                                </h2>
+                                <a href="penempatan_siswa.php"
+                                   class="btn btn-primary btn-sm">
+                                    Lihat Penempatan Siswa
                                 </a>
                             </div>
                         </div>
@@ -191,14 +207,14 @@ if ($role === 'guru') {
 
                     <!-- CATATAN PELANGGARAN -->
                     <div class="col-md-4 mb-3">
-                        <div class="card shadow-sm border-danger h-100">
+                        <div class="card shadow-sm border-primary h-100">
                             <div class="card-body">
                                 <h5>Catatan Pelanggaran</h5>
-                                <h2 class="text-danger">
+                                <h2 class="text-primary">
                                     <?= number_format($total_pelanggaran); ?>
                                 </h2>
                                 <a href="tindakan.php"
-                                   class="btn btn-danger btn-sm">
+                                   class="btn btn-primary btn-sm">
                                     Lihat Pelanggaran
                                 </a>
                             </div>
@@ -230,11 +246,11 @@ if ($role === 'guru') {
 
                     <!-- RIWAYAT PELANGGARAN SISWA -->
                     <div class="col-md-4 mb-3">
-                        <div class="card shadow-sm border-info h-100">
+                        <div class="card shadow-sm border-primary h-100">
                             <div class="card-body">
                                 <h5>Riwayat Pelanggaran Siswa</h5>
 
-                                <h2 class="text-info">
+                                <h2 class="text-primary">
                                     <?= number_format($total_pelanggaran); ?>
                                 </h2>
 
@@ -243,7 +259,7 @@ if ($role === 'guru') {
                                 </p>
 
                                 <a href="riwayat.php"
-                                   class="btn btn-info btn-sm">
+                                   class="btn btn-primary btn-sm">
                                     Lihat Riwayat
                                 </a>
                             </div>
@@ -252,19 +268,21 @@ if ($role === 'guru') {
 
                     <!-- TOTAL POIN -->
                     <div class="col-md-4 mb-3">
-                        <div class="card shadow-sm border-secondary h-100">
+                        <div class="card shadow-sm border-primary h-100">
                             <div class="card-body">
                                 <h5>Total Poin Pelanggaran</h5>
-                                <h2 class="text-secondary">
+                                <h2 class="text-primary">
                                     <?= number_format($total_poin); ?>
                                 </h2>
                                 <a href="rekap_poin.php"
-                                   class="btn btn-secondary btn-sm">
+                                   class="btn btn-primary btn-sm">
                                     Lihat Rekap Poin
                                 </a>
                             </div>
                         </div>
                     </div>
+
+                    
 
                 <?php else : ?>
 

@@ -1,6 +1,8 @@
+
 <?php
 // tambah_guru.php
 include 'includes/cek_session.php';
+include 'config/koneksi.php';
 ?>
 
 <!DOCTYPE html>
@@ -51,7 +53,6 @@ include 'includes/cek_session.php';
                                    class="form-control"
                                    required>
                         </div>
-                    
 
                         <div class="mb-3">
                             <label for="nama" class="form-label">Nama Guru</label>
@@ -70,7 +71,7 @@ include 'includes/cek_session.php';
                                    class="form-control"
                                    required>
                         </div>
-                        
+
                         <div class="mb-3">
                             <label class="form-label">Password</label>
                             <input type="password"
@@ -91,7 +92,9 @@ include 'includes/cek_session.php';
                                    required>
                         </div>
 
+                       
 
+                           
                         <div class="mb-4">
                             <label for="status_aktif" class="form-label">
                                 Status Aktif
