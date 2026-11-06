@@ -3,16 +3,8 @@
 include 'includes/cek_session.php';
 include 'config/koneksi.php';
 
-// Mengambil data siswa
 $sql = "SELECT * FROM t_siswa ORDER BY nama ASC";
 $hasil = mysqli_query($koneksi, $sql);
-
-if (!$hasil) {
-    die("Query gagal: " . mysqli_error($koneksi));
-}
-
-// Nomor urut dimulai dari 1
-$no = 1;
 ?>
 
 <!DOCTYPE html>
@@ -40,6 +32,7 @@ $no = 1;
 
         <?php include 'layout/sidebar.php'; ?>
 
+        <!-- KONTEN -->
         <main class="col-md-9 col-lg-10 p-4">
 
             <h1 class="mb-4">Kelola Siswa</h1>
@@ -55,7 +48,7 @@ $no = 1;
                 </a>
             </div>
 
-            <!-- Tabel Data Siswa -->
+            <!-- TABEL DATA SISWA -->
             <div class="card shadow-sm">
                 <div class="card-body">
 
@@ -66,7 +59,7 @@ $no = 1;
 
                             <thead class="table-dark">
                                 <tr>
-                                    <th>No</th>
+                                    <th>No </th>
                                     <th>NIS</th>
                                     <th>NISN</th>
                                     <th>Nama Siswa</th>
@@ -83,8 +76,8 @@ $no = 1;
                             <?php while ($row = mysqli_fetch_assoc($hasil)) { ?>
 
                                 <tr>
-                                    <!-- Nomor otomatis -->
-                                    <td><?= $no++ ?></td>
+                                <!--Nomor urut otomatis-->
+                                    <td></td>
 
                                     <td>
                                         <?= htmlspecialchars($row['nis'] ?? '') ?>
@@ -100,9 +93,9 @@ $no = 1;
 
                                     <td>
                                         <?php
-                                        if (($row['jenis_kelamin'] ?? '') == 'L') {
+                                        if ($row['jenis_kelamin'] == 'L') {
                                             echo "Laki-laki";
-                                        } elseif (($row['jenis_kelamin'] ?? '') == 'P') {
+                                        } elseif ($row['jenis_kelamin'] == 'P') {
                                             echo "Perempuan";
                                         } else {
                                             echo "-";
@@ -119,14 +112,18 @@ $no = 1;
                                     </td>
 
                                     <td>
-                                        <?php if (($row['status_aktif'] ?? 0) == 1) { ?>
+                                        <?php if ($row['status_aktif'] == 1) { ?>
+
                                             <span class="badge bg-success">
                                                 Aktif
                                             </span>
+
                                         <?php } else { ?>
+
                                             <span class="badge bg-danger">
                                                 Tidak Aktif
                                             </span>
+
                                         <?php } ?>
                                     </td>
 
@@ -134,7 +131,7 @@ $no = 1;
                                         <div class="d-flex gap-2">
 
                                             <a href="edit_siswa.php?id=<?= urlencode($row['id']) ?>"
-                                               class="btn btn-primary btn-sm">
+                                               class="btn btn-warning btn-sm">
                                                 Edit
                                             </a>
 
@@ -168,12 +165,15 @@ $no = 1;
 
 <!-- DataTables -->
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+
+<!-- DataTables Bootstrap 5 -->
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
 $(document).ready(function () {
 
-    $('#tabelSiswa').DataTable({
+    // Inisialisasi DataTables
+    var tabel = $('#tabelSiswa').DataTable({
 
         language: {
             search: "Cari:",
@@ -204,22 +204,34 @@ $(document).ready(function () {
                 orderable: false,
                 searchable: false
             }
-        ],
-
-        // Nomor otomatis mengikuti urutan dan halaman DataTables
-        drawCallback: function () {
-            var api = this.api();
-            var start = api.page.info().start;
-
-            api.column(0, {page: 'current'}).nodes().each(function (cell, i) {
-                cell.innerHTML = start + i + 1;
-            });
-        }
+        ]
 
     });
 
+      // Fungsi nomor urut otomatis
+    function nomorUrut() {
+
+        var informasi = tabel.page.info();
+
+        tabel
+            .column(0, {
+                page: 'current'
+            })
+            .nodes()
+            .each(function (cell, i) {
+
+                cell.textContent = informasi.start + i + 1;
+
+            });
+    }
+
+    // Perbarui nomor urut setiap tabel berubah
+    tabel.on('draw.dt', function () {
+        nomorUrut();
+    });
+
+    // Tampilkan nomor urut saat pertama kali dibuka
+    nomorUrut();
+
 });
 </script>
-
-</body>
-</html>

@@ -5,10 +5,6 @@ include 'config/koneksi.php';
 
 $sql = "SELECT * FROM t_guru ORDER BY nama ASC";
 $hasil = mysqli_query($koneksi, $sql);
-
-if (!$hasil) {
-    die("Query gagal: " . mysqli_error($koneksi));
-}
 ?>
 
 <!DOCTYPE html>
@@ -33,26 +29,24 @@ if (!$hasil) {
 <div class="container-fluid">
     <div class="row">
 
-        <!-- SIDEBAR -->
         <?php include 'layout/sidebar.php'; ?>
 
-        <!-- KONTEN -->
+           <!-- KONTEN -->
         <main class="col-md-9 col-lg-10 p-4">
 
-            <h2>Kelola Guru</h2>
-            <p>Selamat datang di halaman Guru.</p>
+            <h1 class="mb-4">Kelola Guru</h1>
 
+            <!-- Tombol Navigasi -->
             <div class="mb-3">
                 <a href="dashboard.php" class="btn btn-secondary">
                     Kembali ke Dashboard
                 </a>
 
                 <a href="tambah_guru.php" class="btn btn-primary">
-                    Tambah Guru
+                    + Tambah Guru
                 </a>
             </div>
 
-            <!-- TABEL GURU -->
             <div class="table-responsive">
                 <table id="tabelGuru"
                        class="table table-striped table-bordered table-hover">
@@ -71,25 +65,20 @@ if (!$hasil) {
                     </thead>
 
                     <tbody>
-                        <?php
-                        $no = 1;
-
-                        while ($row = mysqli_fetch_assoc($hasil)) {
-                        ?>
+                        <?php while ($row = mysqli_fetch_assoc($hasil)) { ?>
                         <tr>
-                            <!-- NOMOR URUT OTOMATIS -->
-                            <td><?php echo $no++; ?></td>
+                            <td></td>
 
                             <td>
-                                <?php echo htmlspecialchars($row['nip'] ?? ''); ?>
+                                <?php echo htmlspecialchars($row['nip']); ?>
                             </td>
 
                             <td>
-                                <?php echo htmlspecialchars($row['nama'] ?? ''); ?>
+                                <?php echo htmlspecialchars($row['nama']); ?>
                             </td>
 
                             <td>
-                                <?php echo htmlspecialchars($row['email'] ?? ''); ?>
+                                <?php echo htmlspecialchars($row['email']); ?>
                             </td>
 
                             <td>
@@ -109,16 +98,13 @@ if (!$hasil) {
                             </td>
 
                             <td>
-                                <a href="edit_guru.php?id=<?php
-                                    echo urlencode($row['id']);
-                                ?>" class="btn btn-primary btn-sm mb-1">
+                                <a href="edit_guru.php?id=<?php echo urlencode($row['id']); ?>"
+                                   class="btn btn-warning btn-sm">
                                     Edit
                                 </a>
 
-                                <a href="hapus_guru.php?id=<?php
-                                    echo urlencode($row['id']);
-                                ?>"
-                                   class="btn btn-danger btn-sm mb-1"
+                                <a href="hapus_guru.php?id=<?php echo urlencode($row['id']); ?>"
+                                   class="btn btn-danger btn-sm"
                                    onclick="return confirm('Yakin ingin menghapus data guru ini?');">
                                     Hapus
                                 </a>
@@ -134,14 +120,14 @@ if (!$hasil) {
     </div>
 </div>
 
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-<!-- Bootstrap 5 -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<!-- jQuery: wajib dimuat sebelum DataTables -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
 <!-- DataTables -->
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
+
+<!-- DataTables Bootstrap 5 -->
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
@@ -149,18 +135,8 @@ $(document).ready(function () {
 
     $('#tabelGuru').DataTable({
 
-        pageLength: 10,
-        lengthMenu: [5, 10, 25, 50, 100],
-
-        // Urutkan berdasarkan nama guru
-        order: [[2, 'asc']],
-
-        ordering: true,
-        searching: true,
-        paging: true,
-
         language: {
-            search: "Cari guru:",
+            search: "Cari:",
             lengthMenu: "Tampilkan _MENU_ data",
             info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
             infoEmpty: "Tidak ada data guru",
@@ -176,6 +152,12 @@ $(document).ready(function () {
             }
         },
 
+        pageLength: 10,
+
+        lengthMenu: [5, 10, 25, 50, 100],
+
+        order: [[2, 'asc']],
+
         columnDefs: [
             {
                 targets: [0, 7],
@@ -184,23 +166,25 @@ $(document).ready(function () {
             }
         ],
 
-        // Perbarui nomor secara otomatis
-        // ketika tabel berubah atau berpindah halaman
+        // Membuat nomor urut otomatis
         drawCallback: function () {
+
             var api = this.api();
             var info = api.page.info();
 
             api.column(0, {
                 page: 'current'
             }).nodes().each(function (cell, i) {
+
                 cell.innerHTML = info.start + i + 1;
+
             });
+
         }
 
     });
 
 });
 </script>
-
 </body>
 </html>

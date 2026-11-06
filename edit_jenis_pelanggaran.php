@@ -1,17 +1,19 @@
 <?php
 // edit_jenis_pelanggaran.php
+
 include 'includes/cek_session.php';
 include 'config/koneksi.php';
 
+// Ambil ID jenis pelanggaran
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
-if (!$id) {
+if (!$id || $id <= 0) {
     $_SESSION['pesan_error'] = 'ID jenis pelanggaran tidak valid.';
     header('Location: kelola_jenis_pelanggaran.php');
     exit;
 }
 
-// Ambil data yang akan diedit
+// Ambil data jenis pelanggaran
 $stmt = mysqli_prepare(
     $koneksi,
     "SELECT * FROM t_pelanggaran WHERE id = ?"
@@ -32,22 +34,28 @@ if (!$data) {
 }
 
 // Ambil kategori aktif dan kategori yang sedang digunakan
-$sql_kategori = "SELECT id, nama, status_aktif
-                 FROM t_pelanggaran_kategori
-                 WHERE status_aktif = 1
-                    OR id = " . (int) $data['pelanggaran_kategori_id'] . "
-                 ORDER BY nama ASC";
+$stmt_kategori = mysqli_prepare(
+    $koneksi,
+    "SELECT id, nama, status_aktif
+     FROM t_pelanggaran_kategori
+     WHERE status_aktif = 1 OR id = ?
+     ORDER BY nama ASC"
+);
 
-$kategori = mysqli_query($koneksi, $sql_kategori);
+mysqli_stmt_bind_param(
+    $stmt_kategori,
+    "i",
+    $data['pelanggaran_kategori_id']
+);
 
-if (!$kategori) {
-    die("Gagal mengambil kategori: " .
-        htmlspecialchars(mysqli_error($koneksi)));
-}
+mysqli_stmt_execute($stmt_kategori);
+
+$kategori = mysqli_stmt_get_result($stmt_kategori);
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -63,20 +71,45 @@ if (!$kategori) {
 <div class="container-fluid">
     <div class="row">
 
+        <!-- Sidebar -->
         <?php include 'layout/sidebar.php'; ?>
 
+        <!-- Konten Utama -->
         <main class="col-md-9 col-lg-10 p-4">
 
-            <h1 class="mb-4">Edit Jenis Pelanggaran</h1>
+            <!-- Judul dan Tombol Kembali -->
+            <div class="mb-4">
+                <h2 class="mb-3">Edit Jenis Pelanggaran</h2>
 
-            <?php if (isset($_SESSION['pesan_error'])) { ?>
-                <div class="alert alert-danger">
+                <a href="kelola_jenis_pelanggaran.php"
+                   class="btn btn-secondary">
+                    Kembali ke Kelola Jenis Pelanggaran
+                </a>
+            </div>
+
+            <!-- Pesan Error -->
+            <?php if (isset($_SESSION['pesan_error'])): ?>
+                <div class="alert alert-danger alert-dismissible fade show"
+                     role="alert">
+
                     <?= htmlspecialchars($_SESSION['pesan_error']); ?>
-                </div>
-                <?php unset($_SESSION['pesan_error']); ?>
-            <?php } ?>
 
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Close"></button>
+                </div>
+
+                <?php unset($_SESSION['pesan_error']); ?>
+            <?php endif; ?>
+
+            <!-- Form Edit Jenis Pelanggaran -->
             <div class="card shadow-sm">
+
+                <div class="card-header bg-primary text-white">
+                    Form Edit Jenis Pelanggaran
+                </div>
+
                 <div class="card-body">
 
                     <form action="proses_edit_jenis_pelanggaran.php"
@@ -86,15 +119,20 @@ if (!$kategori) {
                                name="id"
                                value="<?= (int) $data['id']; ?>">
 
+                        <!-- Kategori Pelanggaran -->
                         <div class="mb-3">
-                            <label class="form-label">
+                            <label for="pelanggaran_kategori_id"
+                                   class="form-label">
                                 Kategori Pelanggaran
                             </label>
 
-                            <select name="pelanggaran_kategori_id"
-                                    class="form-select" required>
+                            <select class="form-select"
+                                    id="pelanggaran_kategori_id"
+                                    name="pelanggaran_kategori_id"
+                                    required>
 
-                                <?php while ($kat = mysqli_fetch_assoc($kategori)) { ?>
+                                <?php while ($kat = mysqli_fetch_assoc($kategori)): ?>
+
                                     <option
                                         value="<?= (int) $kat['id']; ?>"
                                         <?= (int) $kat['id'] === (int) $data['pelanggaran_kategori_id']
@@ -106,58 +144,85 @@ if (!$kategori) {
                                         <?= (int) $kat['status_aktif'] === 0
                                             ? ' (Tidak Aktif)'
                                             : ''; ?>
+
                                     </option>
-                                <?php } ?>
+
+                                <?php endwhile; ?>
 
                             </select>
                         </div>
 
+                        <!-- Kode Pelanggaran -->
                         <div class="mb-3">
-                            <label class="form-label">Kode Pelanggaran</label>
+                            <label for="kode" class="form-label">
+                                Kode Pelanggaran
+                            </label>
 
                             <input type="text"
-                                   name="kode"
                                    class="form-control"
+                                   id="kode"
+                                   name="kode"
                                    maxlength="30"
                                    value="<?= htmlspecialchars($data['kode'] ?? ''); ?>"
+                                   placeholder="Masukkan Kode Pelanggaran"
                                    required>
                         </div>
 
+                        <!-- Nama Pelanggaran -->
                         <div class="mb-3">
-                            <label class="form-label">Nama Pelanggaran</label>
+                            <label for="nama" class="form-label">
+                                Nama Pelanggaran
+                            </label>
 
                             <input type="text"
-                                   name="nama"
                                    class="form-control"
+                                   id="nama"
+                                   name="nama"
                                    maxlength="150"
                                    value="<?= htmlspecialchars($data['nama'] ?? ''); ?>"
+                                   placeholder="Masukkan Nama Pelanggaran"
                                    required>
                         </div>
 
+                        <!-- Poin -->
                         <div class="mb-3">
-                            <label class="form-label">Poin</label>
+                            <label for="poin" class="form-label">
+                                Poin
+                            </label>
 
                             <input type="number"
-                                   name="poin"
                                    class="form-control"
+                                   id="poin"
+                                   name="poin"
                                    min="0"
                                    value="<?= (int) $data['poin']; ?>"
+                                   placeholder="Masukkan Poin Pelanggaran"
                                    required>
                         </div>
 
+                        <!-- Deskripsi -->
                         <div class="mb-3">
-                            <label class="form-label">Deskripsi</label>
+                            <label for="deskripsi" class="form-label">
+                                Deskripsi
+                            </label>
 
-                            <textarea name="deskripsi"
-                                      class="form-control"
-                                      rows="4"><?= htmlspecialchars($data['deskripsi'] ?? ''); ?></textarea>
+                            <textarea class="form-control"
+                                      id="deskripsi"
+                                      name="deskripsi"
+                                      rows="4"
+                                      placeholder="Masukkan Deskripsi Pelanggaran"><?= htmlspecialchars($data['deskripsi'] ?? ''); ?></textarea>
                         </div>
 
+                        <!-- Status Aktif -->
                         <div class="mb-3">
-                            <label class="form-label">Status Aktif</label>
+                            <label for="status_aktif" class="form-label">
+                                Status Aktif
+                            </label>
 
-                            <select name="status_aktif"
-                                    class="form-select" required>
+                            <select class="form-select"
+                                    id="status_aktif"
+                                    name="status_aktif"
+                                    required>
 
                                 <option value="1"
                                     <?= (int) $data['status_aktif'] === 1
@@ -176,14 +241,19 @@ if (!$kategori) {
                             </select>
                         </div>
 
-                        <button type="submit" class="btn btn-primary">
-                            Update
-                        </button>
+                        <!-- Tombol -->
+                        <div class="d-flex gap-2">
 
-                        <a href="kelola_jenis_pelanggaran.php"
-                           class="btn btn-secondary">
-                            Kembali
-                        </a>
+                            <button type="submit" class="btn btn-primary">
+                                Update Jenis Pelanggaran
+                            </button>
+
+                            <a href="kelola_jenis_pelanggaran.php"
+                               class="btn btn-secondary">
+                                Batal
+                            </a>
+
+                        </div>
 
                     </form>
 
@@ -191,8 +261,11 @@ if (!$kategori) {
             </div>
 
         </main>
+
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

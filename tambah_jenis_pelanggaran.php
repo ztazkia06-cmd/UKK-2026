@@ -1,45 +1,32 @@
 <?php
-// kelola_jenis_pelanggaran.php
+// tambah_jenis_pelanggaran.php
 include 'includes/cek_session.php';
 include 'config/koneksi.php';
 
-// Ambil data jenis pelanggaran beserta nama kategorinya
-$sql = "SELECT
-            p.id,
-            p.pelanggaran_kategori_id,
-            pk.nama AS nama_kategori,
-            p.kode,
-            p.nama,
-            p.poin,
-            p.deskripsi,
-            p.status_aktif,
-            p.created_at,
-            p.updated_at
-        FROM t_pelanggaran p
-        LEFT JOIN t_pelanggaran_kategori pk
-            ON p.pelanggaran_kategori_id = pk.id
-        ORDER BY p.nama ASC";
+// Ambil data kategori pelanggaran
+$sql_kategori = "SELECT id, nama
+                 FROM t_pelanggaran_kategori
+                 ORDER BY nama ASC";
 
-$hasil = mysqli_query($koneksi, $sql);
+$hasil_kategori = mysqli_query($koneksi, $sql_kategori);
 
-if (!$hasil) {
-    die("Gagal mengambil data: " .
+if (!$hasil_kategori) {
+    die("Gagal mengambil kategori: " .
         htmlspecialchars(mysqli_error($koneksi)));
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Kelola Jenis Pelanggaran</title>
+    <title>Tambah Jenis Pelanggaran</title>
 
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-          rel="stylesheet">
-
-    <link href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css"
           rel="stylesheet">
 </head>
 
@@ -48,18 +35,13 @@ if (!$hasil) {
 <div class="container-fluid">
     <div class="row">
 
+        <!-- SIDEBAR -->
         <?php include 'layout/sidebar.php'; ?>
 
+        <!-- KONTEN UTAMA -->
         <main class="col-md-9 col-lg-10 p-4">
 
-            <h1 class="mb-4">Kelola Jenis Pelanggaran</h1>
-
-            <?php if (isset($_SESSION['pesan_sukses'])) { ?>
-                <div class="alert alert-success">
-                    <?= htmlspecialchars($_SESSION['pesan_sukses']); ?>
-                </div>
-                <?php unset($_SESSION['pesan_sukses']); ?>
-            <?php } ?>
+            <h1 class="mb-4">Tambah Jenis Pelanggaran</h1>
 
             <?php if (isset($_SESSION['pesan_error'])) { ?>
                 <div class="alert alert-danger">
@@ -68,158 +50,137 @@ if (!$hasil) {
                 <?php unset($_SESSION['pesan_error']); ?>
             <?php } ?>
 
-            <div class="mb-3">
-                <a href="dashboard.php" class="btn btn-secondary">
-                    Kembali ke Dashboard
-                </a>
-
-                <a href="tambah_jenis_pelanggaran.php"
-                   class="btn btn-primary">
-                    + Tambah Jenis Pelanggaran
-                </a>
-            </div>
-
             <div class="card shadow-sm">
+
+                <div class="card-header bg-primary text-white">
+                    Form Tambah Jenis Pelanggaran
+                </div>
+
                 <div class="card-body">
 
-                    <div class="table-responsive">
-                        <table id="tabelPelanggaran"
-                               class="table table-striped table-bordered table-hover align-middle w-100">
+                    <form action="proses_tambah_jenis_pelanggaran.php"
+                          method="POST"
+                          id="formTambahPelanggaran">
 
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>No</th>
-                                    <th>ID</th>
-                                    <th>Kategori</th>
-                                    <th>Kode</th>
-                                    <th>Nama Pelanggaran</th>
-                                    <th>Poin</th>
-                                    <th>Deskripsi</th>
-                                    <th>Status</th>
-                                    <th>Dibuat</th>
-                                    <th>Diubah</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
+                        <!-- KATEGORI -->
+                        <div class="mb-3">
+                            <label for="pelanggaran_kategori_id"
+                                   class="form-label">
+                                Kategori Pelanggaran
+                            </label>
 
-                            <tbody>
-                            <?php
-                            $no = 1;
+                            <select name="pelanggaran_kategori_id"
+                                    id="pelanggaran_kategori_id"
+                                    class="form-select"
+                                    required>
 
-                            while ($row = mysqli_fetch_assoc($hasil)) {
-                            ?>
-                                <tr>
-                                    <td><?= $no++; ?></td>
+                                <option value="">-- Pilih Kategori --</option>
 
-                                    <td>
-                                        <?= (int) $row['id']; ?>
-                                    </td>
+                                <?php while ($kategori = mysqli_fetch_assoc($hasil_kategori)) { ?>
+                                    <option value="<?= (int) $kategori['id']; ?>">
+                                        <?= htmlspecialchars($kategori['nama']); ?>
+                                    </option>
+                                <?php } ?>
 
-                                    <td>
-                                        <?= htmlspecialchars(
-                                            $row['nama_kategori'] ?? '-'
-                                        ); ?>
-                                    </td>
+                            </select>
+                        </div>
 
-                                    <td>
-                                        <?= htmlspecialchars($row['kode'] ?? ''); ?>
-                                    </td>
+                        <!-- KODE -->
+                        <div class="mb-3">
+                            <label for="kode" class="form-label">
+                                Kode Pelanggaran
+                            </label>
 
-                                    <td>
-                                        <?= htmlspecialchars($row['nama'] ?? ''); ?>
-                                    </td>
+                            <input type="text"
+                                   name="kode"
+                                   id="kode"
+                                   class="form-control"
+                                   maxlength="20"
+                                   placeholder="Contoh: PLG001"
+                                   required>
+                        </div>
 
-                                    <td>
-                                        <?= (int) $row['poin']; ?>
-                                    </td>
+                        <!-- NAMA -->
+                        <div class="mb-3">
+                            <label for="nama" class="form-label">
+                                Nama Pelanggaran
+                            </label>
 
-                                    <td>
-                                        <?= htmlspecialchars($row['deskripsi'] ?? '-'); ?>
-                                    </td>
+                            <input type="text"
+                                   name="nama"
+                                   id="nama"
+                                   class="form-control"
+                                   maxlength="150"
+                                   placeholder="Masukkan nama pelanggaran"
+                                   required>
+                        </div>
 
-                                    <td>
-                                        <?php if ((int) $row['status_aktif'] === 1) { ?>
-                                            <span class="badge bg-success">
-                                                Aktif
-                                            </span>
-                                        <?php } else { ?>
-                                            <span class="badge bg-danger">
-                                                Tidak Aktif
-                                            </span>
-                                        <?php } ?>
-                                    </td>
+                        <!-- POIN -->
+                        <div class="mb-3">
+                            <label for="poin" class="form-label">
+                                Poin Pelanggaran
+                            </label>
 
-                                    <td>
-                                        <?= htmlspecialchars($row['created_at'] ?? '-'); ?>
-                                    </td>
+                            <input type="number"
+                                   name="poin"
+                                   id="poin"
+                                   class="form-control"
+                                   min="0"
+                                   placeholder="Masukkan jumlah poin"
+                                   required>
+                        </div>
 
-                                    <td>
-                                        <?= htmlspecialchars($row['updated_at'] ?? '-'); ?>
-                                    </td>
+                        <!-- DESKRIPSI -->
+                        <div class="mb-3">
+                            <label for="deskripsi" class="form-label">
+                                Deskripsi
+                            </label>
 
-                                    <td>
-                                        <div class="d-flex gap-2">
-                                            <a href="edit_jenis_pelanggaran.php?id=<?= (int) $row['id']; ?>"
-                                               class="btn btn-warning btn-sm">
-                                                Edit
-                                            </a>
+                            <textarea name="deskripsi"
+                                      id="deskripsi"
+                                      class="form-control"
+                                      rows="4"
+                                      placeholder="Masukkan deskripsi pelanggaran"></textarea>
+                        </div>
 
-                                            <a href="hapus_jenis_pelanggaran.php?id=<?= (int) $row['id']; ?>"
-                                               class="btn btn-danger btn-sm"
-                                               onclick="return confirm('Yakin ingin menghapus jenis pelanggaran ini?');">
-                                                Hapus
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php } ?>
-                            </tbody>
+                        <!-- STATUS -->
+                        <div class="mb-4">
+                            <label for="status_aktif" class="form-label">
+                                Status Aktif
+                            </label>
 
-                        </table>
-                    </div>
+                            <select name="status_aktif"
+                                    id="status_aktif"
+                                    class="form-select"
+                                    required>
+
+                                <option value="1" selected>Aktif</option>
+                                <option value="0">Tidak Aktif</option>
+
+                            </select>
+                        </div>
+
+                        <!-- TOMBOL -->
+                        <button type="submit" class="btn btn-primary">
+                            Simpan Pelanggaran
+                        </button>
+
+                        <a href="kelola_jenis_pelanggaran.php"
+                           class="btn btn-secondary">
+                            Kembali
+                        </a>
+
+                    </form>
 
                 </div>
             </div>
 
         </main>
+
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
-
-<script>
-$(document).ready(function () {
-    $('#tabelPelanggaran').DataTable({
-        language: {
-            search: "Cari:",
-            lengthMenu: "Tampilkan _MENU_ data",
-            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-            infoEmpty: "Tidak ada data",
-            infoFiltered: "(difilter dari _MAX_ total data)",
-            zeroRecords: "Data tidak ditemukan",
-            emptyTable: "Belum ada jenis pelanggaran",
-            paginate: {
-                first: "Pertama",
-                last: "Terakhir",
-                next: "Berikutnya",
-                previous: "Sebelumnya"
-            }
-        },
-        pageLength: 10,
-        lengthMenu: [5, 10, 25, 50, 100],
-        order: [[4, 'asc']],
-        columnDefs: [
-            {
-                targets: 10,
-                orderable: false,
-                searchable: false
-            }
-        ]
-    });
-});
-</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

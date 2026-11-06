@@ -1,25 +1,36 @@
-
 <?php
 // edit_guru.php
 
 include 'includes/cek_session.php';
 include 'config/koneksi.php';
 
-if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    die("ID guru tidak valid.");
+// Ambil ID guru
+$id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+
+if ($id <= 0) {
+    $_SESSION['pesan_error'] = "ID guru tidak valid.";
+    header("Location: kelola_guru.php");
+    exit;
 }
 
-$id = (int) $_GET['id'];
+// Ambil data guru
+$stmt = mysqli_prepare(
+    $koneksi,
+    "SELECT * FROM t_guru WHERE id = ?"
+);
 
-$stmt = mysqli_prepare($koneksi, "SELECT * FROM t_guru WHERE id = ?");
 mysqli_stmt_bind_param($stmt, "i", $id);
 mysqli_stmt_execute($stmt);
 
 $hasil = mysqli_stmt_get_result($stmt);
 $data = mysqli_fetch_assoc($hasil);
 
+mysqli_stmt_close($stmt);
+
 if (!$data) {
-    die("Data guru tidak ditemukan.");
+    $_SESSION['pesan_error'] = "Data guru tidak ditemukan.";
+    header("Location: kelola_guru.php");
+    exit;
 }
 ?>
 
@@ -29,9 +40,10 @@ if (!$data) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Edit Guru</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
           rel="stylesheet">
 </head>
 
@@ -41,123 +53,125 @@ if (!$data) {
     <div class="row">
 
         <!-- Sidebar -->
-        <div class="col-3 col-md-3 col-lg-2 bg-dark text-white min-vh-100 p-3">
-
-            <h4 class="mb-4">Pelanggaran Siswa</h4>
-
-            <a href="dashboard.php"
-               class="d-block text-white text-decoration-none p-2 mb-2">
-                Dashboard
-            </a>
-
-            <a href="kelola_siswa.php"
-               class="d-block text-white text-decoration-none p-2 mb-2">
-                Data Siswa
-            </a>
-
-            <a href="kelola_guru.php"
-               class="d-block text-white text-decoration-none p-2 mb-2">
-                Data Guru
-            </a>
-
-            <a href="kelola_kelas.php"
-               class="d-block text-white text-decoration-none p-2 mb-2">
-                Data Kelas
-            </a>
-
-            <a href="kelola_tahun_ajaran.php"
-               class="d-block text-white text-decoration-none p-2 mb-2">
-                Data Tahun Ajaran
-            </a>
-
-            <a href="kelola_wali_kelas.php"
-               class="d-block text-white text-decoration-none p-2 mb-2">
-                Data Wali Kelas
-            </a>
-
-            <a href="penempatan_siswa.php"
-               class="d-block text-white text-decoration-none p-2 mb-2">
-                Penempatan Siswa
-            </a>
-
-            <a href="kelola_pelanggaran_kategori.php"
-               class="d-block text-white text-decoration-none p-2 mb-2">
-                Kategori Pelanggaran
-            </a>
-
-            <a href="about_me.php"
-               class="d-block text-white text-decoration-none p-2 mb-2">
-                About Me
-            </a>
-
-            <br><br>
-
-            <a href="logout.php"
-               class="d-block text-danger text-decoration-none p-2">
-                Logout
-            </a>
-
-        </div>
+        <?php include 'layout/sidebar.php'; ?>
 
         <!-- Konten Utama -->
-        <div class="col-9 col-md-9 col-lg-10 p-4">
+        <main class="col-md-9 col-lg-10 p-4">
 
-            <h3 class="mb-4">Edit Guru</h3>
+            <!-- Judul dan Tombol Kembali -->
+            <div class="mb-4">
+                <h2 class="mb-3">Edit Guru</h2>
 
-            <div class="card rounded-0">
+                <a href="kelola_guru.php" class="btn btn-secondary">
+                    Kembali ke Kelola Guru
+                </a>
+            </div>
 
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">Form Edit Data Guru</h5>
+            <!-- Pesan Error -->
+            <?php if (isset($_SESSION['pesan_error'])): ?>
+                <div class="alert alert-danger alert-dismissible fade show"
+                     role="alert">
+
+                    <?= htmlspecialchars($_SESSION['pesan_error']); ?>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Close"></button>
+                </div>
+
+                <?php unset($_SESSION['pesan_error']); ?>
+            <?php endif; ?>
+
+            <!-- Form Edit Guru -->
+            <div class="card shadow-sm">
+
+                <div class="card-header bg-primary text-white">
+                    Form Edit Guru
                 </div>
 
                 <div class="card-body">
 
-                    <a href="kelola_guru.php"
-                       class="btn btn-secondary btn-sm mb-3">
-                        Kembali ke Kelola Guru
-                    </a>
-
                     <form action="proses_edit_guru.php" method="POST">
 
-                        <input type="hidden" name="id"
+                        <input type="hidden"
+                               name="id"
                                value="<?= (int) $data['id']; ?>">
 
+                        <!-- NIP -->
                         <div class="mb-3">
-                            <label class="form-label">NIP</label>
+                            <label for="nip" class="form-label">
+                                NIP
+                            </label>
 
                             <input type="text"
+                                   class="form-control"
+                                   id="nip"
                                    name="nip"
-                                   maxlength="10"
-                                   class="form-control rounded-0"
-                                   value="<?= htmlspecialchars($data['nip'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   value="<?= htmlspecialchars($data['nip'] ?? ''); ?>"
+                                   placeholder="Masukkan NIP Guru"
                                    required>
                         </div>
 
+                        <!-- Nama Guru -->
                         <div class="mb-3">
-                            <label class="form-label">Nama Guru</label>
+                            <label for="nama" class="form-label">
+                                Nama Guru
+                            </label>
 
                             <input type="text"
+                                   class="form-control"
+                                   id="nama"
                                    name="nama"
-                                   class="form-control rounded-0"
-                                   value="<?= htmlspecialchars($data['nama'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   value="<?= htmlspecialchars($data['nama'] ?? ''); ?>"
+                                   placeholder="Masukkan Nama Guru"
                                    required>
                         </div>
 
+                        <!-- Email -->
                         <div class="mb-3">
-                            <label class="form-label">Email</label>
+                            <label for="email" class="form-label">
+                                Email
+                            </label>
 
                             <input type="email"
+                                   class="form-control"
+                                   id="email"
                                    name="email"
-                                   class="form-control rounded-0"
-                                   value="<?= htmlspecialchars($data['email'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                                   value="<?= htmlspecialchars($data['email'] ?? ''); ?>"
+                                   placeholder="Masukkan Email Guru"
                                    required>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Status Aktif</label>
+                        <!-- Password -->
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" name="password"
+                               class="form-control"
+                               placeholder="Masukkan Password"
+                               minlength="6"
+                               required>
+                    </div>
 
-                            <select name="status_aktif"
-                                    class="form-select rounded-0"
+                    <!-- Konfirmasi Password -->
+                    <div class="mb-3">
+                        <label class="form-label">Konfirmasi Password</label>
+                        <input type="password" name="konfirmasi_password"
+                               class="form-control"
+                               placeholder="Ulangi Password"
+                               minlength="6"
+                               required>
+                    </div>
+
+                        <!-- Status Aktif -->
+                        <div class="mb-3">
+                            <label for="status_aktif" class="form-label">
+                                Status Aktif
+                            </label>
+
+                            <select class="form-select"
+                                    id="status_aktif"
+                                    name="status_aktif"
                                     required>
 
                                 <option value="1"
@@ -173,35 +187,29 @@ if (!$data) {
                             </select>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">User ID</label>
+                        <!-- Tombol -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                Update Guru
+                            </button>
 
-                            <input type="number"
-                                   name="user_id"
-                                   class="form-control rounded-0"
-                                   value="<?= htmlspecialchars((string) ($data['user_id'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
+                            <a href="kelola_guru.php"
+                               class="btn btn-secondary">
+                                Batal
+                            </a>
                         </div>
-
-                        <button type="submit" class="btn btn-primary btn-sm">
-                            Simpan Perubahan
-                        </button>
-
-                        <a href="kelola_guru.php"
-                           class="btn btn-secondary btn-sm">
-                            Batal
-                        </a>
 
                     </form>
 
                 </div>
             </div>
 
-        </div>
+        </main>
 
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
