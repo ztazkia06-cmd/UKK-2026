@@ -1,3 +1,4 @@
+
 <?php
 // laporan.php
 
@@ -5,7 +6,82 @@ include 'includes/cek_session.php';
 include 'config/koneksi.php';
 
 // ============================================
-// 1. EXPORT EXCEL
+// 1. CEK ROLE DAN KELAS WALI KELAS
+// ============================================
+
+$role = strtolower(trim($_SESSION['role'] ?? ''));
+
+$id_user = (int) (
+    $_SESSION['id_user'] ??
+    $_SESSION['id'] ??
+    0
+);
+
+$is_wali_kelas = false;
+$id_kelas_wali = 0;
+
+// Cek kelas yang menjadi tanggung jawab pengguna
+if ($id_user > 0 && isset($koneksi)) {
+
+    $query_wali = mysqli_prepare(
+        $koneksi,
+        "SELECT w.kelas_id
+         FROM t_wali_kelas w
+         INNER JOIN t_guru g ON w.guru_id = g.id
+         WHERE g.user_id = ?
+         ORDER BY w.id DESC
+         LIMIT 1"
+    );
+
+    if ($query_wali) {
+
+        mysqli_stmt_bind_param(
+            $query_wali,
+            "i",
+            $id_user
+        );
+
+        mysqli_stmt_execute($query_wali);
+
+        mysqli_stmt_bind_result(
+            $query_wali,
+            $id_kelas
+        );
+
+        if (mysqli_stmt_fetch($query_wali)) {
+            $is_wali_kelas = true;
+            $id_kelas_wali = (int) $id_kelas;
+        }
+
+        mysqli_stmt_close($query_wali);
+    }
+}
+
+// Jika role wali kelas tetapi belum ditemukan kelasnya,
+// jangan tampilkan laporan kelas lain.
+if (
+    $role === 'wali_kelas' ||
+    $role === 'wali kelas' ||
+    $role === 'walikelas'
+) {
+    $is_wali_kelas = true;
+}
+
+// Filter kelas untuk wali kelas
+$filterKelas = "";
+
+if ($is_wali_kelas) {
+
+    if ($id_kelas_wali > 0) {
+        $filterKelas = " WHERE ps.kelas_id = " . $id_kelas_wali;
+    } else {
+        $filterKelas = " WHERE ps.kelas_id = 0";
+    }
+}
+
+
+// ============================================
+// 2. EXPORT EXCEL
 // ============================================
 
 if (isset($_GET['export']) && $_GET['export'] === 'excel') {
@@ -22,6 +98,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
             ON ps.siswa_id = s.id
         JOIN t_pelanggaran p
             ON ps.pelanggaran_id = p.id
+        $filterKelas
         ORDER BY ps.id DESC
     ";
 
@@ -38,7 +115,6 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
     header("Pragma: no-cache");
     header("Expires: 0");
 
-    // Membantu Excel membaca karakter UTF-8
     echo "\xEF\xBB\xBF";
 
     echo '<table border="1">';
@@ -88,7 +164,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
 
 
 // ============================================
-// 2. MENGAMBIL DATA LAPORAN
+// 3. MENGAMBIL DATA LAPORAN
 // ============================================
 
 $sql = "
@@ -104,6 +180,7 @@ $sql = "
         ON ps.siswa_id = s.id
     JOIN t_pelanggaran p
         ON ps.pelanggaran_id = p.id
+    $filterKelas
     ORDER BY ps.id DESC
 ";
 
@@ -273,7 +350,6 @@ if (!$hasil) {
 
             </div>
 
-
             <!-- CARD DATA LAPORAN -->
             <div class="card shadow-sm">
 
@@ -311,7 +387,6 @@ if (!$hasil) {
 
                                     <tr>
 
-                                        <!-- Nomor urut otomatis -->
                                         <td></td>
 
                                         <td>
@@ -429,7 +504,6 @@ $(document).ready(function () {
             }
         ],
 
-        // Nomor urut otomatis
         drawCallback: function () {
 
             var api = this.api();
@@ -459,17 +533,12 @@ function cetakPDF() {
 
     var tabel = $('#tabelLaporan').DataTable();
 
-    // Simpan jumlah data per halaman
     panjangHalamanSebelumCetak = tabel.page.len();
 
-    // Tampilkan semua data
     tabel.page.len(-1).draw();
 
-    // Jalankan cetak browser
     setTimeout(function () {
-
         window.print();
-
     }, 300);
 
 }
