@@ -6,7 +6,7 @@ include 'includes/cek_session.php';
 include 'config/koneksi.php';
 
 // Data diri
-$nama = "Tazkia Zahr4444a";
+$nama = "Tazkia Zahra";
 $kelas = "XI RPL";
 $sekolah = "SMK Muhammadiyah Tasikmalaya";
 $jurusan = "Rekayasa Perangkat Lunak";

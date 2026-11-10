@@ -111,7 +111,7 @@ if ($role === 'guru') {
                     <div class="col-md-4 mb-3">
                         <div class="card shadow-sm border-primary h-100">
                             <div class="card-body">
-                                <h5>Data Sis1546141wa</h5>
+                                <h5>Data Siswa</h5>
                                 <h2 class="text-primary">
                                     <?= number_format($total_siswa); ?>
                                 </h2>
