@@ -270,7 +270,7 @@ if ($role === 'guru') {
                     <div class="col-md-4 mb-3">
                         <div class="card shadow-sm border-primary h-100">
                             <div class="card-body">
-                                <h5>Total Poin Pelanggaran</h5>
+                                <h5>Rekap Poin</h5>
                                 <h2 class="text-primary">
                                     <?= number_format($total_poin); ?>
                                 </h2>
