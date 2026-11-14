@@ -1,3 +1,4 @@
+
 <?php
 // laporan.php
 
@@ -142,6 +143,22 @@ if (!empty($params)) {
 
 mysqli_stmt_execute($stmt);
 $hasil = mysqli_stmt_get_result($stmt);
+
+// Informasi tambahan untuk dokumen cetak
+$jumlah_data = mysqli_num_rows($hasil);
+$tanggal_cetak = date('d-m-Y');
+
+if ($tanggal_mulai !== '' && $tanggal_selesai !== '') {
+    $periode = date('d-m-Y', strtotime($tanggal_mulai)) .
+        ' s.d. ' .
+        date('d-m-Y', strtotime($tanggal_selesai));
+} elseif ($tanggal_mulai !== '') {
+    $periode = 'Mulai ' . date('d-m-Y', strtotime($tanggal_mulai));
+} elseif ($tanggal_selesai !== '') {
+    $periode = 'Sampai ' . date('d-m-Y', strtotime($tanggal_selesai));
+} else {
+    $periode = 'Seluruh Periode';
+}
 ?>
 
 <!DOCTYPE html>
@@ -162,27 +179,136 @@ $hasil = mysqli_stmt_get_result($stmt);
         rel="stylesheet">
 
     <style>
+        /* Tambahan khusus cetak, tidak mengubah tampilan halaman */
+        .dokumen-cetak {
+            display: none;
+        }
+
         @media print {
+
+            @page {
+                size: A4 landscape;
+                margin: 15mm;
+            }
+
             .no-print,
             .sidebar,
             #tabelLaporan_wrapper .dt-search,
             #tabelLaporan_wrapper .dt-length,
-            #tabelLaporan_wrapper .dt-paging {
+            #tabelLaporan_wrapper .dt-paging,
+            #tabelLaporan_wrapper .dt-info {
                 display: none !important;
             }
 
             main {
                 width: 100% !important;
+                max-width: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
             }
 
             body {
-                font-size: 11px;
+                font-family: "Times New Roman", serif !important;
+                font-size: 11pt;
+                color: #000 !important;
+            }
+
+            .container-fluid,
+            .row {
+                display: block !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .card {
+                border: none !important;
+                box-shadow: none !important;
+            }
+
+            .card-body {
+                padding: 0 !important;
+            }
+
+            .table-responsive {
+                overflow: visible !important;
             }
 
             table {
                 width: 100% !important;
+                border-collapse: collapse !important;
+                font-size: 10pt !important;
+            }
+
+            table th,
+            table td {
+                border: 1px solid #000 !important;
+                padding: 6px !important;
+                color: #000 !important;
+                background: #fff !important;
+            }
+
+            table thead th {
+                text-align: center !important;
+                font-weight: bold !important;
+            }
+
+            /* Dokumen sekolah hanya muncul saat dicetak */
+            .dokumen-cetak {
+                display: block !important;
+            }
+
+            .kop-sekolah {
+                text-align: center;
+                border-bottom: 3px double #000;
+                padding-bottom: 10px;
+                margin-bottom: 20px;
+            }
+
+            .kop-sekolah h2 {
+                font-size: 18pt;
+                font-weight: bold;
+                text-transform: uppercase;
+                margin: 0 0 5px;
+            }
+
+            .kop-sekolah p {
+                font-size: 11pt;
+                margin: 2px 0;
+            }
+
+            .judul-dokumen {
+                text-align: center;
+                margin-bottom: 15px;
+            }
+
+            .judul-dokumen h3 {
+                font-size: 14pt;
+                font-weight: bold;
+                text-decoration: underline;
+                margin-bottom: 5px;
+            }
+
+            .judul-dokumen p {
+                margin: 3px 0;
+            }
+
+            .tanda-tangan {
+                display: flex !important;
+                justify-content: space-between;
+                margin-top: 35px;
+                page-break-inside: avoid;
+            }
+
+            .kolom-tanda-tangan {
+                width: 230px;
+                text-align: center;
+            }
+
+            .nama-tanda-tangan {
+                margin-top: 65px;
+                font-weight: bold;
+                text-decoration: underline;
             }
         }
     </style>
@@ -272,7 +398,7 @@ $hasil = mysqli_stmt_get_result($stmt);
                     <span>Data Laporan Pelanggaran</span>
 
                     <button type="button"
-                        onclick="window.print()"
+                        onclick="cetakLaporan()"
                         class="btn btn-light btn-sm no-print">
                         Cetak Laporan
                     </button>
@@ -280,6 +406,30 @@ $hasil = mysqli_stmt_get_result($stmt);
                 </div>
 
                 <div class="card-body">
+
+                    <!-- TAMBAHAN DOKUMEN CETAK -->
+                    <div class="dokumen-cetak">
+
+                        <div class="kop-sekolah">
+                            <h2>SMK Muhammadiyah Tasikmalaya</h2>
+                            <p>LAPORAN DATA PELANGGARAN SISWA</p>
+                        </div>
+
+                        <div class="judul-dokumen">
+                            <h3>LAPORAN PELANGGARAN SISWA</h3>
+
+                            <p>
+                                Periode:
+                                <?= htmlspecialchars($periode); ?>
+                            </p>
+
+                            <p>
+                                Jumlah Data:
+                                <?= $jumlah_data; ?> Pelanggaran
+                            </p>
+                        </div>
+
+                    </div>
 
                     <div class="table-responsive">
 
@@ -348,6 +498,40 @@ $hasil = mysqli_stmt_get_result($stmt);
 
                     </div>
 
+                    <!-- TANDA TANGAN KHUSUS CETAK -->
+                    <div class="dokumen-cetak tanda-tangan">
+
+                        <div class="kolom-tanda-tangan">
+                            <p>Mengetahui,</p>
+                            <p>Kepala Sekolah</p>
+
+                            <p class="nama-tanda-tangan">
+                                ....................................
+                            </p>
+
+                            <p>NIP/NBM. ................................</p>
+                        </div>
+
+                        <div class="kolom-tanda-tangan">
+                            <p>
+                                Tasikmalaya, <?= $tanggal_cetak; ?>
+                            </p>
+
+                            <?php if ($role === 'guru') { ?>
+                                <p>Guru Wali Kelas,</p>
+                            <?php } else { ?>
+                                <p>Admin,</p>
+                            <?php } ?>
+
+                            <p class="nama-tanda-tangan">
+                                ....................................
+                            </p>
+
+                            <p>NIP/NBM. ................................</p>
+                        </div>
+
+                    </div>
+
                 </div>
             </div>
 
@@ -373,60 +557,86 @@ $hasil = mysqli_stmt_get_result($stmt);
 
 <!-- Inisialisasi DataTables -->
 <script>
-$(document).ready(function () {
+    let tabelLaporan;
+    let panjangAwal = 10;
 
-    $('#tabelLaporan').DataTable({
+    $(document).ready(function () {
 
-        language: {
-            search: "Cari:",
-            lengthMenu: "Tampilkan _MENU_ data",
-            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-            infoEmpty: "Tidak ada data laporan",
-            infoFiltered: "(difilter dari _MAX_ total data)",
-            zeroRecords: "Data laporan tidak ditemukan",
-            emptyTable: "Belum ada data pelanggaran",
+        tabelLaporan = $('#tabelLaporan').DataTable({
 
-            paginate: {
-                first: "Pertama",
-                last: "Terakhir",
-                next: "Berikutnya",
-                previous: "Sebelumnya"
+            language: {
+                search: "Cari:",
+                lengthMenu: "Tampilkan _MENU_ data",
+                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+                infoEmpty: "Tidak ada data laporan",
+                infoFiltered: "(difilter dari _MAX_ total data)",
+                zeroRecords: "Data laporan tidak ditemukan",
+                emptyTable: "Belum ada data pelanggaran",
+
+                paginate: {
+                    first: "Pertama",
+                    last: "Terakhir",
+                    next: "Berikutnya",
+                    previous: "Sebelumnya"
+                }
+            },
+
+            pageLength: 10,
+
+            lengthMenu: [5, 10, 25, 50, 100],
+
+            order: [[5, 'desc']],
+
+            columnDefs: [
+                {
+                    targets: 0,
+                    orderable: false,
+                    searchable: false
+                }
+            ],
+
+            // Nomor urut otomatis
+            drawCallback: function () {
+
+                var api = this.api();
+                var info = api.page.info();
+
+                api.column(0, {
+                    page: 'current'
+                }).nodes().each(function (cell, i) {
+
+                    cell.innerHTML = info.start + i + 1;
+
+                });
+
             }
-        },
 
-        pageLength: 10,
-
-        lengthMenu: [5, 10, 25, 50, 100],
-
-        order: [[5, 'desc']],
-
-        columnDefs: [
-            {
-                targets: 0,
-                orderable: false,
-                searchable: false
-            }
-        ],
-
-        // Nomor urut otomatis
-        drawCallback: function () {
-
-            var api = this.api();
-            var info = api.page.info();
-
-            api.column(0, {
-                page: 'current'
-            }).nodes().each(function (cell, i) {
-
-                cell.innerHTML = info.start + i + 1;
-
-            });
-
-        }
+        });
 
     });
 
-});
+    // Cetak seluruh data laporan
+    function cetakLaporan() {
+
+        panjangAwal = tabelLaporan.page.len();
+
+        // Tampilkan seluruh data sebelum dicetak
+        tabelLaporan.page.len(-1).draw();
+
+        setTimeout(function () {
+            window.print();
+        }, 500);
+
+    }
+
+    // Kembalikan jumlah data seperti semula setelah cetak
+    window.addEventListener('afterprint', function () {
+
+        if (tabelLaporan) {
+            tabelLaporan.page.len(panjangAwal).draw();
+        }
+
+    });
 </script>
 
 </body>
@@ -435,4 +645,3 @@ $(document).ready(function () {
 <?php
 mysqli_stmt_close($stmt);
 ?>
-\

@@ -1,6 +1,11 @@
+
 <?php
 include 'includes/cek_session.php';
 include 'config/koneksi.php';
+
+// Ambil role login
+$role = $_SESSION['role'] ?? '';
+$isWaliKelas = ($role === 'guru');
 
 if (!isset($_GET['id']) || !ctype_digit($_GET['id'])) {
     $_SESSION['pesan_error'] = "ID pelanggaran tidak valid.";
@@ -57,14 +62,6 @@ $pelanggaran = mysqli_query($koneksi, "
     SELECT id, nama, poin, pelanggaran_kategori_id
     FROM t_pelanggaran
     WHERE status_aktif = 1 OR id = " . (int)$data['pelanggaran_id'] . "
-    ORDER BY nama ASC
-");
-
-// Daftar guru
-$guru = mysqli_query($koneksi, "
-    SELECT id, nama
-    FROM t_guru
-    WHERE status_aktif = 1 OR id = " . (int)$data['guru_id'] . "
     ORDER BY nama ASC
 ");
 
@@ -150,7 +147,9 @@ function e($nilai) {
                                 <label class="form-label">Kelas</label>
 
                                 <select name="kelas_id"
-                                        class="form-select" required>
+                                        class="form-select"
+                                        <?php echo $isWaliKelas ? 'disabled' : ''; ?>
+                                        required>
 
                                     <?php while ($k = mysqli_fetch_assoc($kelas)) { ?>
                                         <option value="<?php echo $k['id']; ?>"
@@ -166,6 +165,13 @@ function e($nilai) {
                                     <?php } ?>
 
                                 </select>
+
+                                <?php if ($isWaliKelas) { ?>
+                                    <input type="hidden"
+                                           name="kelas_id"
+                                           value="<?php echo (int)$data['kelas_id']; ?>">
+                                <?php } ?>
+
                             </div>
 
                             <div class="col-md-6 mb-3">
@@ -195,24 +201,8 @@ function e($nilai) {
                                        name="pelanggaran_kategori_id"
                                        id="kategori"
                                        value="<?php echo (int)$data['pelanggaran_kategori_id']; ?>">
-                            </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Guru Pelapor</label>
-
-                                <select name="guru_id"
-                                        class="form-select" required>
-
-                                    <?php while ($g = mysqli_fetch_assoc($guru)) { ?>
-                                        <option value="<?php echo $g['id']; ?>"
-                                            <?php echo $data['guru_id'] == $g['id'] ? 'selected' : ''; ?>>
-
-                                            <?php echo e($g['nama']); ?>
-
-                                        </option>
-                                    <?php } ?>
-
-                                </select>
+                                <small class="text-muted" id="infoPoin"></small>
                             </div>
 
                             <div class="col-md-6 mb-3">
@@ -222,18 +212,6 @@ function e($nilai) {
                                        name="tanggal"
                                        class="form-control"
                                        value="<?php echo e($data['tanggal']); ?>"
-                                       required>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Poin Pelanggaran</label>
-
-                                <input type="number"
-                                       name="poin"
-                                       id="poin"
-                                       class="form-control"
-                                       min="0"
-                                       value="<?php echo (int)$data['poin']; ?>"
                                        required>
                             </div>
 
@@ -271,14 +249,6 @@ function e($nilai) {
                                           rows="3"><?php echo e($data['keterangan']); ?></textarea>
                             </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Tindakan</label>
-
-                                <textarea name="tindakan"
-                                          class="form-control"
-                                          rows="3"><?php echo e($data['tindakan']); ?></textarea>
-                            </div>
-
                         </div>
 
                         <button type="submit" class="btn btn-primary">
@@ -301,15 +271,21 @@ function e($nilai) {
 
 <script>
 const pilihanPelanggaran = document.getElementById('pelanggaran');
-const inputPoin = document.getElementById('poin');
 const inputKategori = document.getElementById('kategori');
+const infoPoin = document.getElementById('infoPoin');
 
-pilihanPelanggaran.addEventListener('change', function () {
-    const opsi = this.options[this.selectedIndex];
+function tampilkanPoin() {
+    const opsi = pilihanPelanggaran.options[pilihanPelanggaran.selectedIndex];
 
-    inputPoin.value = opsi.dataset.poin || '';
-    inputKategori.value = opsi.dataset.kategori || '';
-});
+    if (opsi) {
+        infoPoin.textContent = 'Poin pelanggaran: ' + (opsi.dataset.poin || '0');
+        inputKategori.value = opsi.dataset.kategori || '';
+    }
+}
+
+pilihanPelanggaran.addEventListener('change', tampilkanPoin);
+
+tampilkanPoin();
 </script>
 
 </body>

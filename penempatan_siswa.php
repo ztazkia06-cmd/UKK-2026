@@ -1,7 +1,24 @@
+
 <?php
 // penempatan_siswa.php
 include 'includes/cek_session.php';
 include 'config/koneksi.php';
+
+/*
+|--------------------------------------------------------------------------
+| SINKRONISASI STATUS SISWA DAN PENEMPATAN
+|--------------------------------------------------------------------------
+| Jika siswa tidak aktif, penempatannya ikut tidak aktif.
+| Jika siswa aktif kembali, penempatannya ikut aktif kembali.
+*/
+
+mysqli_query(
+    $koneksi,
+    "UPDATE t_kelas_siswa ks
+     INNER JOIN t_siswa s ON ks.siswa_id = s.id
+     SET ks.status_aktif = s.status_aktif
+     WHERE ks.status_aktif <> s.status_aktif"
+);
 
 // Ambil daftar siswa aktif
 $siswa = mysqli_query(
@@ -53,6 +70,7 @@ $hasil = mysqli_query($koneksi, $sql);
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -66,9 +84,24 @@ $hasil = mysqli_query($koneksi, $sql);
     <!-- DataTables Bootstrap 5 -->
     <link href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css"
           rel="stylesheet">
+
+    <!-- Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+          rel="stylesheet">
+
+    <!-- Select2 Bootstrap 5 Theme -->
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+          rel="stylesheet">
+
+    <style>
+        .select2-container {
+            width: 100% !important;
+        }
+    </style>
 </head>
 
 <body>
+
 <div class="container-fluid">
     <div class="row">
 
@@ -78,6 +111,7 @@ $hasil = mysqli_query($koneksi, $sql);
         <main class="col-md-9 col-lg-10 p-4">
 
             <h2 class="mb-2">Penempatan Siswa</h2>
+
             <p class="text-muted">
                 Kelola penempatan siswa berdasarkan tahun ajaran dan kelas.
             </p>
@@ -92,9 +126,11 @@ $hasil = mysqli_query($koneksi, $sql);
             <?php if (isset($_SESSION['pesan_sukses'])) { ?>
                 <div class="alert alert-success alert-dismissible fade show">
                     <?= htmlspecialchars($_SESSION['pesan_sukses']); ?>
+
                     <button type="button" class="btn-close"
                             data-bs-dismiss="alert"></button>
                 </div>
+
                 <?php unset($_SESSION['pesan_sukses']); ?>
             <?php } ?>
 
@@ -102,107 +138,156 @@ $hasil = mysqli_query($koneksi, $sql);
             <?php if (isset($_SESSION['pesan_error'])) { ?>
                 <div class="alert alert-danger alert-dismissible fade show">
                     <?= htmlspecialchars($_SESSION['pesan_error']); ?>
+
                     <button type="button" class="btn-close"
                             data-bs-dismiss="alert"></button>
                 </div>
+
                 <?php unset($_SESSION['pesan_error']); ?>
             <?php } ?>
 
             <!-- FORM PENEMPATAN -->
             <div class="card shadow-sm mb-4">
+
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">Form Penempatan Siswa</h5>
                 </div>
 
                 <div class="card-body">
+
                     <form action="proses_simpan_penempatan.php" method="POST">
 
+                        <!-- Siswa -->
                         <div class="mb-3">
+
                             <label for="siswa_id" class="form-label">
                                 Siswa
                             </label>
 
-                            <select name="siswa_id" id="siswa_id"
-                                    class="form-select" required>
+                            <select name="siswa_id"
+                                    id="siswa_id"
+                                    class="form-select"
+                                    required>
+
                                 <option value="">-- Pilih Siswa --</option>
 
                                 <?php while ($s = mysqli_fetch_assoc($siswa)) { ?>
+
                                     <option value="<?= htmlspecialchars($s['id']); ?>">
                                         <?= htmlspecialchars($s['nis'] . ' - ' . $s['nama']); ?>
                                     </option>
+
                                 <?php } ?>
+
                             </select>
+
                         </div>
 
+                        <!-- Tahun Ajaran -->
                         <div class="mb-3">
+
                             <label for="tahun_ajaran_id" class="form-label">
                                 Tahun Ajaran
                             </label>
 
-                            <select name="tahun_ajaran_id" id="tahun_ajaran_id"
-                                    class="form-select" required>
+                            <select name="tahun_ajaran_id"
+                                    id="tahun_ajaran_id"
+                                    class="form-select"
+                                    required>
+
                                 <option value="">-- Pilih Tahun Ajaran --</option>
 
                                 <?php while ($ta = mysqli_fetch_assoc($tahun)) { ?>
+
                                     <option value="<?= htmlspecialchars($ta['id']); ?>">
                                         <?= htmlspecialchars($ta['nama']); ?>
                                     </option>
+
                                 <?php } ?>
+
                             </select>
+
                         </div>
 
+                        <!-- Kelas -->
                         <div class="mb-3">
+
                             <label for="kelas_id" class="form-label">
                                 Kelas
                             </label>
 
-                            <select name="kelas_id" id="kelas_id"
-                                    class="form-select" required>
+                            <select name="kelas_id"
+                                    id="kelas_id"
+                                    class="form-select"
+                                    required>
+
                                 <option value="">-- Pilih Kelas --</option>
 
                                 <?php while ($k = mysqli_fetch_assoc($kelas)) { ?>
+
                                     <option value="<?= htmlspecialchars($k['id']); ?>">
                                         <?= htmlspecialchars(
                                             $k['nama'] . ' - Tingkat ' .
                                             $k['tingkat'] . ' - ' . $k['jurusan']
                                         ); ?>
                                     </option>
+
                                 <?php } ?>
+
                             </select>
+
                         </div>
 
+                        <!-- Tanggal -->
                         <div class="row">
+
                             <div class="col-md-6 mb-3">
+
                                 <label for="tanggal_mulai" class="form-label">
                                     Tanggal Mulai
                                 </label>
 
-                                <input type="date" name="tanggal_mulai"
+                                <input type="date"
+                                       name="tanggal_mulai"
                                        id="tanggal_mulai"
-                                       class="form-control" required>
+                                       class="form-control"
+                                       required>
+
                             </div>
 
                             <div class="col-md-6 mb-3">
+
                                 <label for="tanggal_selesai" class="form-label">
                                     Tanggal Selesai
                                 </label>
 
-                                <input type="date" name="tanggal_selesai"
+                                <input type="date"
+                                       name="tanggal_selesai"
                                        id="tanggal_selesai"
-                                       class="form-control" required>
+                                       class="form-control"
+                                       required>
+
                             </div>
+
                         </div>
 
+                        <!-- Status -->
                         <div class="mb-3">
+
                             <label for="status_aktif" class="form-label">
                                 Status
                             </label>
 
-                            <select name="status_aktif" id="status_aktif"
-                                    class="form-select" required>
+                            <select name="status_aktif"
+                                    id="status_aktif"
+                                    class="form-select"
+                                    required>
+
                                 <option value="1">Aktif</option>
                                 <option value="0">Tidak Aktif</option>
+
                             </select>
+
                         </div>
 
                         <button type="submit" class="btn btn-primary">
@@ -210,22 +295,26 @@ $hasil = mysqli_query($koneksi, $sql);
                         </button>
 
                     </form>
+
                 </div>
             </div>
 
             <!-- TABEL DATA PENEMPATAN -->
             <div class="card shadow-sm">
+
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">Data Penempatan Siswa</h5>
                 </div>
 
                 <div class="card-body">
+
                     <div class="table-responsive">
 
                         <table id="tabelPenempatan"
                                class="table table-striped table-bordered table-hover align-middle">
 
                             <thead class="table-dark">
+
                                 <tr>
                                     <th>No</th>
                                     <th>NIS</th>
@@ -238,14 +327,19 @@ $hasil = mysqli_query($koneksi, $sql);
                                     <th>Tanggal Selesai</th>
                                     <th>Status</th>
                                 </tr>
+
                             </thead>
 
                             <tbody>
+
                                 <?php
                                 $no = 1;
+
                                 while ($row = mysqli_fetch_assoc($hasil)) {
                                 ?>
+
                                     <tr>
+
                                         <td><?= $no++; ?></td>
 
                                         <td>
@@ -281,18 +375,27 @@ $hasil = mysqli_query($koneksi, $sql);
                                         </td>
 
                                         <td>
+
                                             <?php if ($row['status_aktif'] == 1) { ?>
+
                                                 <span class="badge bg-success">
                                                     Aktif
                                                 </span>
+
                                             <?php } else { ?>
+
                                                 <span class="badge bg-secondary">
                                                     Tidak Aktif
                                                 </span>
+
                                             <?php } ?>
+
                                         </td>
+
                                     </tr>
+
                                 <?php } ?>
+
                             </tbody>
 
                         </table>
@@ -302,6 +405,7 @@ $hasil = mysqli_query($koneksi, $sql);
             </div>
 
         </main>
+
     </div>
 </div>
 
@@ -311,13 +415,33 @@ $hasil = mysqli_query($koneksi, $sql);
 <!-- Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <!-- DataTables JS -->
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/2.3.4/js/dataTables.bootstrap5.min.js"></script>
 
-<!-- Pengaturan DataTables -->
 <script>
 $(document).ready(function () {
+
+    // Pencarian siswa berdasarkan NIS atau nama
+    $('#siswa_id').select2({
+        theme: 'bootstrap-5',
+        placeholder: '-- Pilih Siswa --',
+        allowClear: true,
+        width: '100%',
+        language: {
+            noResults: function () {
+                return "Siswa tidak ditemukan";
+            },
+            searching: function () {
+                return "Mencari siswa...";
+            }
+        }
+    });
+
+    // DataTables
     $('#tabelPenempatan').DataTable({
         language: {
             search: "Cari:",
@@ -338,6 +462,7 @@ $(document).ready(function () {
         lengthMenu: [5, 10, 25, 50, 100],
         order: [[0, 'asc']]
     });
+
 });
 </script>
 
