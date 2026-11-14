@@ -8,8 +8,6 @@ include 'config/koneksi.php';
 |--------------------------------------------------------------------------
 | SINKRONISASI STATUS SISWA DAN PENEMPATAN
 |--------------------------------------------------------------------------
-| Jika siswa tidak aktif, penempatannya ikut tidak aktif.
-| Jika siswa aktif kembali, penempatannya ikut aktif kembali.
 */
 
 mysqli_query(
@@ -159,7 +157,6 @@ $hasil = mysqli_query($koneksi, $sql);
 
                         <!-- Siswa -->
                         <div class="mb-3">
-
                             <label for="siswa_id" class="form-label">
                                 Siswa
                             </label>
@@ -172,20 +169,16 @@ $hasil = mysqli_query($koneksi, $sql);
                                 <option value="">-- Pilih Siswa --</option>
 
                                 <?php while ($s = mysqli_fetch_assoc($siswa)) { ?>
-
                                     <option value="<?= htmlspecialchars($s['id']); ?>">
                                         <?= htmlspecialchars($s['nis'] . ' - ' . $s['nama']); ?>
                                     </option>
-
                                 <?php } ?>
 
                             </select>
-
                         </div>
 
                         <!-- Tahun Ajaran -->
                         <div class="mb-3">
-
                             <label for="tahun_ajaran_id" class="form-label">
                                 Tahun Ajaran
                             </label>
@@ -198,20 +191,16 @@ $hasil = mysqli_query($koneksi, $sql);
                                 <option value="">-- Pilih Tahun Ajaran --</option>
 
                                 <?php while ($ta = mysqli_fetch_assoc($tahun)) { ?>
-
                                     <option value="<?= htmlspecialchars($ta['id']); ?>">
                                         <?= htmlspecialchars($ta['nama']); ?>
                                     </option>
-
                                 <?php } ?>
 
                             </select>
-
                         </div>
 
                         <!-- Kelas -->
                         <div class="mb-3">
-
                             <label for="kelas_id" class="form-label">
                                 Kelas
                             </label>
@@ -224,25 +213,21 @@ $hasil = mysqli_query($koneksi, $sql);
                                 <option value="">-- Pilih Kelas --</option>
 
                                 <?php while ($k = mysqli_fetch_assoc($kelas)) { ?>
-
                                     <option value="<?= htmlspecialchars($k['id']); ?>">
                                         <?= htmlspecialchars(
                                             $k['nama'] . ' - Tingkat ' .
                                             $k['tingkat'] . ' - ' . $k['jurusan']
                                         ); ?>
                                     </option>
-
                                 <?php } ?>
 
                             </select>
-
                         </div>
 
                         <!-- Tanggal -->
                         <div class="row">
 
                             <div class="col-md-6 mb-3">
-
                                 <label for="tanggal_mulai" class="form-label">
                                     Tanggal Mulai
                                 </label>
@@ -252,11 +237,9 @@ $hasil = mysqli_query($koneksi, $sql);
                                        id="tanggal_mulai"
                                        class="form-control"
                                        required>
-
                             </div>
 
                             <div class="col-md-6 mb-3">
-
                                 <label for="tanggal_selesai" class="form-label">
                                     Tanggal Selesai
                                 </label>
@@ -266,14 +249,12 @@ $hasil = mysqli_query($koneksi, $sql);
                                        id="tanggal_selesai"
                                        class="form-control"
                                        required>
-
                             </div>
 
                         </div>
 
                         <!-- Status -->
                         <div class="mb-3">
-
                             <label for="status_aktif" class="form-label">
                                 Status
                             </label>
@@ -287,7 +268,6 @@ $hasil = mysqli_query($koneksi, $sql);
                                 <option value="0">Tidak Aktif</option>
 
                             </select>
-
                         </div>
 
                         <button type="submit" class="btn btn-primary">
@@ -314,7 +294,6 @@ $hasil = mysqli_query($koneksi, $sql);
                                class="table table-striped table-bordered table-hover align-middle">
 
                             <thead class="table-dark">
-
                                 <tr>
                                     <th>No</th>
                                     <th>NIS</th>
@@ -326,8 +305,8 @@ $hasil = mysqli_query($koneksi, $sql);
                                     <th>Tanggal Mulai</th>
                                     <th>Tanggal Selesai</th>
                                     <th>Status</th>
+                                    <th>Aksi</th>
                                 </tr>
-
                             </thead>
 
                             <tbody>
@@ -375,21 +354,33 @@ $hasil = mysqli_query($koneksi, $sql);
                                         </td>
 
                                         <td>
-
                                             <?php if ($row['status_aktif'] == 1) { ?>
-
                                                 <span class="badge bg-success">
                                                     Aktif
                                                 </span>
-
                                             <?php } else { ?>
-
                                                 <span class="badge bg-secondary">
                                                     Tidak Aktif
                                                 </span>
-
                                             <?php } ?>
+                                        </td>
 
+                                        <!-- AKSI EDIT DAN HAPUS -->
+                                        <td>
+                                            <div class="d-flex gap-1">
+
+                                                <a href="edit_penempatan_siswa.php?id=<?= (int) $row['id']; ?>"
+                                                   class="btn btn-warning btn-sm">
+                                                    Edit
+                                                </a>
+
+                                                <a href="hapus_penempatan_siswa.php?id=<?= (int) $row['id']; ?>"
+                                                   class="btn btn-danger btn-sm"
+                                                   onclick="return confirm('Yakin ingin menghapus data penempatan siswa ini?')">
+                                                    Hapus
+                                                </a>
+
+                                            </div>
                                         </td>
 
                                     </tr>

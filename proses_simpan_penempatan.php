@@ -1,4 +1,3 @@
-
 <?php
 // proses_simpan_penempatan.php
 
@@ -109,51 +108,6 @@ mysqli_stmt_close($stmt);
 
 if (!$kelas_valid) {
     $_SESSION['pesan_error'] = "Kelas tidak ditemukan atau tidak aktif.";
-    header("Location: penempatan_siswa.php");
-    exit;
-}
-
-/*
-|--------------------------------------------------------------------------
-| TAMBAHAN: CEK DUPLIKAT PENEMPATAN SISWA
-|--------------------------------------------------------------------------
-| Satu siswa hanya boleh memiliki satu penempatan
-| dalam satu tahun ajaran, meskipun statusnya tidak aktif.
-*/
-
-$stmt = mysqli_prepare(
-    $koneksi,
-    "SELECT id
-     FROM t_kelas_siswa
-     WHERE siswa_id = ?
-       AND tahun_ajaran_id = ?
-     LIMIT 1"
-);
-
-if (!$stmt) {
-    $_SESSION['pesan_error'] = "Gagal memeriksa data penempatan.";
-    header("Location: penempatan_siswa.php");
-    exit;
-}
-
-mysqli_stmt_bind_param(
-    $stmt,
-    "ii",
-    $siswa_id,
-    $tahun_ajaran_id
-);
-
-mysqli_stmt_execute($stmt);
-mysqli_stmt_store_result($stmt);
-
-$penempatan_ada = mysqli_stmt_num_rows($stmt) > 0;
-
-mysqli_stmt_close($stmt);
-
-if ($penempatan_ada) {
-    $_SESSION['pesan_error'] =
-        "Siswa tersebut sudah memiliki penempatan pada tahun ajaran yang dipilih. Tidak boleh ada data duplikat.";
-
     header("Location: penempatan_siswa.php");
     exit;
 }
