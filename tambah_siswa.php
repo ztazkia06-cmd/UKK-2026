@@ -51,7 +51,10 @@ include 'config/koneksi.php';
                                 name="nis"
                                 id="nis"
                                 maxlength="10"
+                                minlength="10"
                                 class="form-control"
+                                inputmode="numeric"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                 required>
                         </div>
 
@@ -62,7 +65,10 @@ include 'config/koneksi.php';
                                 name="nisn"
                                 id="nisn"
                                 maxlength="10"
+                                minlength="10"
                                 class="form-control"
+                                inputmode="numeric"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                 required>
                         </div>
 

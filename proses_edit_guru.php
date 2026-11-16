@@ -8,14 +8,12 @@ $nip = $_POST['nip'];
 $nama = $_POST['nama'];
 $email = $_POST['email'];
 $status_aktif = $_POST['status_aktif'];
-$user_id = $_POST['user_id'];
 
 $sql = "UPDATE t_guru SET
         nip = '$nip',
         nama = '$nama',
         email = '$email',
-        status_aktif = '$status_aktif',
-        user_id = '$user_id'
+        status_aktif = '$status_aktif'
         WHERE id = '$id'";
 
 $hasil = mysqli_query($koneksi, $sql);

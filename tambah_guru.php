@@ -44,14 +44,13 @@ include 'config/koneksi.php';
                           method="POST"
                           id="formTambahGuru">
 
-                        <div class="mb-3">
-                            <label for="nip" class="form-label">NIP</label>
-                            <input type="text"
-                                   name="nip"
-                                   maxlength="10"
-                                   id="nip"
+                       <div class="mb-3">
+                            <label class="form-label">NIP</label>
+                            <input type="text" name="nip" id="nip"
                                    class="form-control"
-                                   required>
+                                   oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                   maxlength="18" inputmode="numeric" required>
+                            <small>NIP harus berupa angka, maksimal 18 digit.</small>
                         </div>
 
                         <div class="mb-3">

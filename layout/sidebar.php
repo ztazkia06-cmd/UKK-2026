@@ -1,6 +1,30 @@
+
 <?php
 $current_page = basename($_SERVER['PHP_SELF']);
 
+// Ambil ID user dari session
+$id_user = (int) ($_SESSION['id_user'] ?? $_SESSION['id'] ?? 0);
+
+// Cek apakah guru merupakan wali kelas
+$is_wali_kelas = false;
+
+if ($_SESSION['role'] === "guru" && $id_user > 0) {
+
+    $query_wali = mysqli_query(
+        $koneksi,
+        "SELECT COUNT(*) AS total
+         FROM t_guru g
+         INNER JOIN t_wali_kelas w ON g.id = w.guru_id
+         WHERE g.user_id = $id_user"
+    );
+
+    if ($query_wali) {
+        $data_wali = mysqli_fetch_assoc($query_wali);
+        $is_wali_kelas = ((int) $data_wali['total'] > 0);
+    }
+}
+
+// ROLE ADMIN
 if ($_SESSION['role'] === "admin") {
 ?>
 
@@ -102,6 +126,7 @@ if ($_SESSION['role'] === "admin") {
     </div>
 
 <?php
+// ROLE GURU
 } elseif ($_SESSION['role'] === "guru") {
 ?>
 
@@ -149,12 +174,17 @@ if ($_SESSION['role'] === "admin") {
                 </a>
             </li>
 
-            <li class="nav-item mb-2">
-                <a href="laporan.php"
-                   class="nav-link <?= ($current_page == 'laporan.php') ? 'active' : 'text-white' ?>">
-                    Laporan
-                </a>
-            </li>
+            <!-- LAPORAN HANYA UNTUK GURU YANG MENJADI WALI KELAS -->
+            <?php if ($is_wali_kelas) : ?>
+
+                <li class="nav-item mb-2">
+                    <a href="laporan.php"
+                       class="nav-link <?= ($current_page == 'laporan.php') ? 'active' : 'text-white' ?>">
+                        Laporan
+                    </a>
+                </li>
+
+            <?php endif; ?>
 
             <hr class="text-secondary">
 
